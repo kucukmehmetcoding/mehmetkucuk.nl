@@ -1,0 +1,139 @@
+{
+  "HomePage": {
+    "title": "What would you like to build?",
+    "subtitle": "Web Design, Software and AI Solutions",
+    "searchPlaceholder": "Describe your dream project...",
+    "searchButton": "Start Chat",
+    "helperText": "Chat with our AI assistant to describe your project, get a quote, or learn about our services.",
+    "exampleText": "E.g: \"I want an e-commerce website\"",
+    "servicesButton": "Explore Services",
+    "aiAssistant": "AI Assistant",
+    "chatPlaceholder": "Type your message...",
+    "aboutLink": "About",
+    "contactLink": "Contact",
+    "countryName": "Turkey"
+  },
+  "Navigation": {
+    "home": "Home",
+    "services": "Services",
+    "portfolio": "Portfolio",
+    "contact": "Contact",
+    "about": "About",
+    "languageSelector": "Language"
+  },
+  "Services": {
+    "webDesign": "Web Design",
+    "software": "Software Development",
+    "aiBots": "AI Bots"
+  },
+  "PortfolioPage": {
+    "title": "Portfolio",
+    "subtitle": "Explore my recent projects and professional work.",
+    "filterAll": "All Projects",
+    "filterWeb": "Web Design",
+    "filterSoftware": "Software",
+    "filterAI": "AI Solutions",
+    "viewProject": "View Project",
+    "liveDemo": "Live Demo",
+    "sourceCode": "Source Code",
+    "techStack": "Technologies",
+    "projectType": "Project Type",
+    "completionDate": "Completion Date",
+    "client": "Client",
+    "ctaTitle": "Can I Create Something For You Too?",
+    "ctaSubtitle": "Contact me to bring your project to life. I'm ready to create custom solutions for you.",
+    "ctaButton": "Let's Start a Project"
+  },
+  "ServicesPage": {
+    "title": "Our Services",
+    "subtitle": "All the solutions you need in the digital world in one place.",
+    "ctaTitle": "Let's Bring Your Project to Life",
+    "ctaSubtitle": "Contact us immediately and benefit from our custom solutions.",
+    "ctaButton": "Get Quote",
+    "items": {
+      "webDesign": {
+        "title": "Web Design",
+        "description": "We design modern, user-friendly and SEO compatible websites. Reflect your brand's digital face in the best way.",
+        "features": "Responsive Design,SEO Compatibility,Fast Loading,Modern UI/UX"
+      },
+      "software": {
+        "title": "Software Development",
+        "description": "We develop scalable and secure custom software solutions that automate your business processes.",
+        "features": "Custom Web Apps,API Integrations,Database Management,Cloud Solutions"
+      },
+      "aiBots": {
+        "title": "AI Bots",
+        "description": "Empower your customer service and sales processes with intelligent AI assistants working 24/7.",
+        "features": "24/7 Customer Support,Sales Automation,Natural Language Processing,Multi-language Support"
+      }
+    }
+  },
+  "AboutPage": {
+    "title": "About Me",
+    "subtitle": "I create value in the digital world by combining technology and design.",
+    "bioTitle": "Who Am I?",
+    "bioDescription": "As a freelance software developer and web designer, I contribute to the digital transformation processes of businesses. I develop user-friendly, fast, and SEO-compatible projects using modern technologies.",
+    "philosophyTitle": "My Philosophy",
+    "philosophyDescription": "I adopt Google's principle of simplicity and functionality. My greatest passion is transforming complex problems into simple and effective solutions.",
+    "skillsTitle": "Skills & Technologies"
+  },
+  "Contact": {
+    "title": "Get In Touch",
+    "subtitle": "Take the first step to bring your project to life. We are here for custom solutions for you.",
+    "infoTitle": "Contact Information",
+    "formName": "Your Full Name",
+    "formEmail": "Your Email Address",
+    "formSubject": "Subject",
+    "formMessage": "Your Message",
+    "formButton": "Send",
+    "formSelectSubject": "Select Subject",
+    "formSubjectWeb": "Web Design",
+    "formSubjectSoftware": "Software Development",
+    "formSubjectAI": "AI Bot",
+    "formSubjectOther": "Other",
+    "formMessagePlaceholder": "Tell us about your project...",
+    "emailLabel": "Email",
+    "emailAvailable": "You can write to us 24/7",
+    "locationLabel": "Location"
+  },
+  "Footer": {
+    "rights": "All rights reserved.",
+    "description": "Carry your business to the future with modern web solutions and AI technologies.",
+    "quickLinks": "Quick Links",
+    "contact": "Contact",
+    "social": "Social Media"
+  },
+  "SEO": {
+    "defaultTitle": "Mehmet Kucuk | Freelance Software & Web Design",
+    "defaultDescription": "Professional web design, custom software development, and AI solutions. Modern technologies to grow your business in the digital world.",
+    "homeTitle": "Mehmet Kucuk | Web Design, Software & AI Solutions",
+    "homeDescription": "I develop simple and effective websites, custom software, and AI bots with Google logic. Get a quote now.",
+    "servicesTitle": "Services | Web Design & Software Development",
+    "servicesDescription": "Responsive web design, SEO-friendly coding, custom software, and AI bot services. The best digital solutions for your business.",
+    "aboutTitle": "About Me | Mehmet Kucuk",
+    "aboutDescription": "Who is freelance software developer Mehmet Kucuk? Learn about my working philosophy, skills, and technologies.",
+    "contactTitle": "Contact | Let's Start Your Project",
+    "contactDescription": "Contact me for your web design or software project. Freelance services based in Rotterdam and Istanbul.",
+    "portfolioTitle": "Portfolio | Project Showcase",
+    "portfolioDescription": "Explore my portfolio of web design, software development, and AI solution projects."
+  },
+  "Maintenance": {
+    "title": "Site Under Maintenance",
+    "description": "We are currently performing scheduled maintenance to improve your experience.",
+    "workTitle": "What's happening?",
+    "workItem1": "System updates and optimizations",
+    "workItem2": "Database maintenance",
+    "workItem3": "Security enhancements",
+    "completion": "Expected completion: Soon",
+    "apology": "We apologize for any inconvenience.",
+    "adminLogin": "Admin Login"
+  },
+  "Auth": {
+    "loginTitle": "Admin Login",
+    "email": "Email",
+    "password": "Password",
+    "loginButton": "Login",
+    "logoutButton": "Logout",
+    "error": "Invalid credentials"
+  }
+}

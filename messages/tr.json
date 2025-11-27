@@ -1,0 +1,145 @@
+{
+  "HomePage": {
+    "title": "Ne inşa etmek istersiniz?",
+    "subtitle": "Web Tasarım, Yazılım ve Yapay Zeka Çözümleri",
+    "searchPlaceholder": "Hayalinizdeki projeyi anlatın...",
+    "searchButton": "Sohbeti Başlat",
+    "helperText": "Yapay zeka asistanımızla sohbet ederek projenizi anlatabilir, fiyat teklifi alabilir veya hizmetlerimiz hakkında bilgi edinebilirsiniz.",
+    "exampleText": "Örn: \"E-ticaret sitesi istiyorum\"",
+    "servicesButton": "Hizmetleri İncele",
+    "aiAssistant": "AI Asistan",
+    "chatPlaceholder": "Mesajınızı yazın...",
+    "aboutLink": "Hakkımızda",
+    "contactLink": "İletişim",
+    "countryName": "Türkiye"
+  },
+  "Navigation": {
+    "home": "Ana Sayfa",
+    "services": "Hizmetler",
+    "portfolio": "Çalışmalarımız",
+    "contact": "İletişim",
+    "about": "Hakkımızda",
+    "languageSelector": "Dil Seçimi"
+  },
+  "Services": {
+    "webDesign": "Web Tasarım",
+    "software": "Yazılım Geliştirme",
+    "aiBots": "Yapay Zeka Botları"
+  },
+  "PortfolioPage": {
+    "title": "Çalışmalarımız",
+    "subtitle": "Gerçekleştirdiğim projeleri ve çalışmaları keşfedin.",
+    "filterAll": "Tüm Projeler",
+    "filterWeb": "Web Tasarım",
+    "filterSoftware": "Yazılım",
+    "filterAI": "AI Çözümleri",
+    "viewProject": "Projeyi Görüntüle",
+    "liveDemo": "Canlı Demo",
+    "sourceCode": "Kaynak Kod",
+    "techStack": "Teknolojiler",
+    "projectType": "Proje Türü",
+    "completionDate": "Tamamlanma Tarihi",
+    "client": "Müşteri",
+    "ctaTitle": "Sizin İçin De Bir Şeyler Yapabilir miyim?",
+    "ctaSubtitle": "Projenizi hayata geçirmek için benimle iletişime geçin. Size özel çözümler üretmeye hazırım.",
+    "ctaButton": "Proje Başlatalım",
+    "categories": {
+      "all": "Tümü",
+      "web": "Web",
+      "software": "Yazılım",
+      "ai": "Yapay Zeka"
+    }
+  },
+  "ServicesPage": {
+    "title": "Hizmetlerimiz",
+    "subtitle": "Dijital dünyada ihtiyacınız olan tüm çözümler tek bir noktada.",
+    "ctaTitle": "Projenizi Hayata Geçirelim",
+    "ctaSubtitle": "Hemen bizimle iletişime geçin ve size özel çözümlerimizden yararlanın.",
+    "ctaButton": "Teklif Alın",
+    "items": {
+      "webDesign": {
+        "title": "Web Tasarım",
+        "description": "Modern, kullanıcı dostu ve SEO uyumlu web siteleri tasarlıyoruz. Markanızın dijital yüzünü en iyi şekilde yansıtın.",
+        "features": "Responsive Tasarım,SEO Uyumluluğu,Hızlı Yükleme,Modern UI/UX"
+      },
+      "software": {
+        "title": "Yazılım Geliştirme",
+        "description": "İş süreçlerinizi otomatize eden, ölçeklenebilir ve güvenli özel yazılım çözümleri geliştiriyoruz.",
+        "features": "Özel Web Uygulamaları,API Entegrasyonları,Veritabanı Yönetimi,Bulut Çözümleri"
+      },
+      "aiBots": {
+        "title": "Yapay Zeka Botları",
+        "description": "Müşteri hizmetleri ve satış süreçlerinizi 7/24 çalışan akıllı yapay zeka asistanları ile güçlendirin.",
+        "features": "7/24 Müşteri Desteği,Satış Otomasyonu,Doğal Dil İşleme,Çoklu Dil Desteği"
+      }
+    }
+  },
+  "Contact": {
+    "title": "İletişime Geçin",
+    "subtitle": "Projenizi hayata geçirmek için ilk adımı atın. Size özel çözümler için buradayız.",
+    "infoTitle": "İletişim Bilgileri",
+    "formName": "Adınız Soyadınız",
+    "formEmail": "E-posta Adresiniz",
+    "formSubject": "Konu",
+    "formMessage": "Mesajınız",
+    "formButton": "Gönder",
+    "formSelectSubject": "Konu Seçiniz",
+    "formSubjectWeb": "Web Tasarım",
+    "formSubjectSoftware": "Yazılım Geliştirme",
+    "formSubjectAI": "Yapay Zeka Botu",
+    "formSubjectOther": "Diğer",
+    "formMessagePlaceholder": "Projenizden bahsedin...",
+    "emailLabel": "E-posta",
+    "emailAvailable": "7/24 bize yazabilirsiniz",
+    "locationLabel": "Konum"
+  },
+  "AboutPage": {
+    "title": "Hakkımda",
+    "subtitle": "Teknoloji ve tasarımı birleştirerek dijital dünyada değer yaratıyorum.",
+    "bioTitle": "Ben Kimim?",
+    "bioDescription": "Freelance yazılım geliştirici ve web tasarımcısı olarak, işletmelerin dijital dönüşüm süreçlerine katkıda bulunuyorum. Modern teknolojileri kullanarak, kullanıcı dostu, hızlı ve SEO uyumlu projeler geliştiriyorum.",
+    "philosophyTitle": "Çalışma Felsefem",
+    "philosophyDescription": "Google'ın sadelik ve işlevsellik ilkesini benimsiyorum. Karmaşık problemleri basit ve etkili çözümlere dönüştürmek en büyük tutkum.",
+    "skillsTitle": "Yetenekler & Teknolojiler"
+  },
+  "Footer": {
+    "rights": "Tüm hakları saklıdır.",
+    "description": "Modern web çözümleri ve yapay zeka teknolojileri ile işinizi geleceğe taşıyın.",
+    "quickLinks": "Hızlı Bağlantılar",
+    "contact": "İletişim",
+    "social": "Sosyal Medya"
+  },
+  "SEO": {
+    "defaultTitle": "Mehmet Küçük | Freelance Yazılım & Web Tasarım",
+    "defaultDescription": "Profesyonel web tasarım, özel yazılım geliştirme ve yapay zeka çözümleri. İşinizi dijital dünyada büyütmek için modern teknolojiler.",
+    "homeTitle": "Mehmet Küçük | Web Tasarım, Yazılım ve AI Çözümleri",
+    "homeDescription": "Google mantığıyla sade ve etkili web siteleri, özel yazılımlar ve yapay zeka botları geliştiriyorum. Hemen teklif alın.",
+    "servicesTitle": "Hizmetler | Web Tasarım & Yazılım Geliştirme",
+    "servicesDescription": "Responsive web tasarım, SEO uyumlu kodlama, özel yazılım ve AI bot hizmetleri. İşletmeniz için en iyi dijital çözümler.",
+    "aboutTitle": "Hakkımda | Mehmet Küçük",
+    "aboutDescription": "Freelance yazılım geliştirici Mehmet Küçük kimdir? Çalışma felsefem, yeteneklerim ve teknolojilerim hakkında bilgi edinin.",
+    "contactTitle": "İletişim | Projenizi Başlatalım",
+    "contactDescription": "Web tasarım veya yazılım projeniz için benimle iletişime geçin. Rotterdam ve İstanbul merkezli freelance hizmetler.",
+    "portfolioTitle": "Çalışmalarımız | Proje Portföyü",
+    "portfolioDescription": "Gerçekleştirdiğim web tasarım, yazılım geliştirme ve yapay zeka çözümleri projelerini inceleyin."
+  },
+  "Maintenance": {
+    "title": "Site Bakım Modunda",
+    "description": "Deneyiminizi geliştirmek için şu anda planlı bakım gerçekleştiriyoruz.",
+    "workTitle": "Neler yapılıyor?",
+    "workItem1": "Sistem güncellemeleri ve optimizasyonlar",
+    "workItem2": "Veritabanı bakımı",
+    "workItem3": "Güvenlik geliştirmeleri",
+    "completion": "Tahmini tamamlanma: Yakında",
+    "apology": "Verdiğimiz rahatsızlık için özür dileriz.",
+    "adminLogin": "Yönetici Girişi"
+  },
+  "Auth": {
+    "loginTitle": "Yönetici Girişi",
+    "email": "E-posta",
+    "password": "Şifre",
+    "loginButton": "Giriş Yap",
+    "logoutButton": "Çıkış Yap",
+    "error": "Geçersiz bilgiler"
+  }
+}

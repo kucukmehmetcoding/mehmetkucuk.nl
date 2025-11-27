@@ -1,0 +1,139 @@
+{
+  "HomePage": {
+    "title": "Wat wilt u bouwen?",
+    "subtitle": "Webdesign, Software en AI Oplossingen",
+    "searchPlaceholder": "Beschrijf uw droomproject...",
+    "searchButton": "Start Chat",
+    "helperText": "Chat met onze AI-assistent om uw project te beschrijven, een offerte te krijgen of meer te weten te komen over onze diensten.",
+    "exampleText": "Bijv: \"Ik wil een e-commerce website\"",
+    "servicesButton": "Bekijk Diensten",
+    "aiAssistant": "AI Assistent",
+    "chatPlaceholder": "Typ uw bericht...",
+    "aboutLink": "Over Ons",
+    "contactLink": "Contact",
+    "countryName": "Turkije"
+  },
+  "Navigation": {
+    "home": "Home",
+    "services": "Diensten",
+    "portfolio": "Portfolio",
+    "contact": "Contact",
+    "about": "Over Ons",
+    "languageSelector": "Taal"
+  },
+  "Services": {
+    "webDesign": "Webdesign",
+    "software": "Softwareontwikkeling",
+    "aiBots": "AI Bots"
+  },
+  "PortfolioPage": {
+    "title": "Portfolio",
+    "subtitle": "Ontdek mijn recente projecten en professionele werk.",
+    "filterAll": "Alle Projecten",
+    "filterWeb": "Webdesign",
+    "filterSoftware": "Software",
+    "filterAI": "AI Oplossingen",
+    "viewProject": "Bekijk Project",
+    "liveDemo": "Live Demo",
+    "sourceCode": "Broncode",
+    "techStack": "Technologieën",
+    "projectType": "Projecttype",
+    "completionDate": "Voltooiingsdatum",
+    "client": "Klant",
+    "ctaTitle": "Kan Ik Ook Iets Voor U Maken?",
+    "ctaSubtitle": "Neem contact met mij op om uw project tot leven te brengen. Ik ben klaar om aangepaste oplossingen voor u te creëren.",
+    "ctaButton": "Laten We Een Project Starten"
+  },
+  "ServicesPage": {
+    "title": "Onze Diensten",
+    "subtitle": "Alle oplossingen die u nodig heeft in de digitale wereld op één plek.",
+    "ctaTitle": "Laten We Uw Project Tot Leben Brengen",
+    "ctaSubtitle": "Neem direct contact met ons op en profiteer van onze op maat gemaakte oplossingen.",
+    "ctaButton": "Offerte Aanvragen",
+    "items": {
+      "webDesign": {
+        "title": "Webdesign",
+        "description": "Wij ontwerpen moderne, gebruiksvriendelijke en SEO-compatibele websites. Weerspiegel uw digitale gezicht op de beste manier.",
+        "features": "Responsive Design,SEO Compatibiliteit,Snel Laden,Moderne UI/UX"
+      },
+      "software": {
+        "title": "Softwareontwikkeling",
+        "description": "Wij ontwikkelen schaalbare en veilige softwareoplossingen op maat die uw bedrijfsprocessen automatiseren.",
+        "features": "Webapplicaties op Maat,API Integraties,Database Beheer,Cloud Oplossingen"
+      },
+      "aiBots": {
+        "title": "AI Bots",
+        "description": "Versterk uw klantenservice en verkoopprocessen met intelligente AI-assistenten die 24/7 werken.",
+        "features": "24/7 Klantenservice,Verkoopautomatisering,Natuurlijke Taalverwerking,Meertalige Ondersteuning"
+      }
+    }
+  },
+  "AboutPage": {
+    "title": "Over Mij",
+    "subtitle": "Ik creëer waarde in de digitale wereld door technologie en design te combineren.",
+    "bioTitle": "Wie Ben Ik?",
+    "bioDescription": "Als freelance softwareontwikkelaar en webdesigner draag ik bij aan de digitale transformatieprocessen van bedrijven. Ik ontwikkel gebruiksvriendelijke, snelle en SEO-compatibele projecten met behulp van moderne technologieën.",
+    "philosophyTitle": "Mijn Filosofie",
+    "philosophyDescription": "Ik hanteer het principe van eenvoud en functionaliteit van Google. Mijn grootste passie is het omzetten van complexe problemen in eenvoudige en effectieve oplossingen.",
+    "skillsTitle": "Vaardigheden & Technologieën"
+  },
+  "Contact": {
+    "title": "Neem Contact Op",
+    "subtitle": "Zet de eerste stap om uw project tot leven te brengen. Wij zijn er voor aangepaste oplossingen voor u.",
+    "infoTitle": "Contactinformatie",
+    "formName": "Uw Volledige Naam",
+    "formEmail": "Uw E-mailadres",
+    "formSubject": "Onderwerp",
+    "formMessage": "Uw Bericht",
+    "formButton": "Verzenden",
+    "formSelectSubject": "Selecteer Onderwerp",
+    "formSubjectWeb": "Webdesign",
+    "formSubjectSoftware": "Softwareontwikkeling",
+    "formSubjectAI": "AI Bot",
+    "formSubjectOther": "Anders",
+    "formMessagePlaceholder": "Vertel ons over uw project...",
+    "emailLabel": "E-mail",
+    "emailAvailable": "U kunt ons 24/7 schrijven",
+    "locationLabel": "Locatie"
+  },
+  "Footer": {
+    "rights": "Alle rechten voorbehouden.",
+    "description": "Breng uw bedrijf naar de toekomst met moderne weboplossingen en AI-technologieën.",
+    "quickLinks": "Snelle Links",
+    "contact": "Contact",
+    "social": "Sociale Media"
+  },
+  "SEO": {
+    "defaultTitle": "Mehmet Kucuk | Freelance Software & Webdesign",
+    "defaultDescription": "Professioneel webdesign, softwareontwikkeling op maat en AI-oplossingen. Moderne technologieën om uw bedrijf te laten groeien in de digitale wereld.",
+    "homeTitle": "Mehmet Kucuk | Webdesign, Software & AI Oplossingen",
+    "homeDescription": "Ik ontwikkel eenvoudige en effectieve websites, software op maat en AI-bots met Google-logica. Vraag nu een offerte aan.",
+    "servicesTitle": "Diensten | Webdesign & Softwareontwikkeling",
+    "servicesDescription": "Responsive webdesign, SEO-vriendelijke codering, software op maat en AI-botdiensten. De beste digitale oplossingen voor uw bedrijf.",
+    "aboutTitle": "Over Mij | Mehmet Kucuk",
+    "aboutDescription": "Wie is freelance softwareontwikkelaar Mehmet Kucuk? Leer meer over mijn werkfilosofie, vaardigheden en technologieën.",
+    "contactTitle": "Contact | Laten We Uw Project Starten",
+    "contactDescription": "Neem contact met mij op voor uw webdesign- of softwareproject. Freelance diensten gevestigd in Rotterdam en Istanbul.",
+    "portfolioTitle": "Portfolio | Project Showcase",
+    "portfolioDescription": "Ontdek mijn portfolio van webdesign-, softwareontwikkeling- en AI-oplossingsprojecten."
+  },
+  "Maintenance": {
+    "title": "Site Onder Onderhoud",
+    "description": "We voeren momenteel gepland onderhoud uit om uw ervaring te verbeteren.",
+    "workTitle": "Wat gebeurt er?",
+    "workItem1": "Systeemupdates en optimalisaties",
+    "workItem2": "Database onderhoud",
+    "workItem3": "Beveiligingsverbeteringen",
+    "completion": "Verwachte voltooiing: Binnenkort",
+    "apology": "Onze excuses voor het ongemak.",
+    "adminLogin": "Admin Inloggen"
+  },
+  "Auth": {
+    "loginTitle": "Admin Login",
+    "email": "E-mail",
+    "password": "Wachtwoord",
+    "loginButton": "Inloggen",
+    "logoutButton": "Uitloggen",
+    "error": "Ongeldige inloggegevens"
+  }
+}
