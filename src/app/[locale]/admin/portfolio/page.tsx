@@ -1,9 +1,15 @@
-import { prisma } from '@/lib/prisma';
+"use client";
+
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+interface Project {
+  id: string;
+  title: string;
+}
+
 export default function PortfolioAdmin() {
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const router = useRouter();
 
   async function fetchProjects() {
