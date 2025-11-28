@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXTAUTH_URL || 'https://mehmetkucuk.nl';
-  const locales = ['tr', 'en'];
+  const locales = ['tr', 'en', 'nl'];
   const paths = [
     { path: '', priority: 1.0, changeFrequency: 'daily' as const },
     { path: '/about', priority: 0.8, changeFrequency: 'weekly' as const },
@@ -27,6 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           languages: {
             tr: `${baseUrl}/tr${path}`,
             en: `${baseUrl}/en${path}`,
+            nl: `${baseUrl}/nl${path}`,
           },
         },
       });
@@ -55,6 +56,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             languages: {
               tr: `${baseUrl}/tr/blog/${post.slug}`,
               en: `${baseUrl}/en/blog/${post.slug}`,
+              nl: `${baseUrl}/nl/blog/${post.slug}`,
             },
           },
         });
