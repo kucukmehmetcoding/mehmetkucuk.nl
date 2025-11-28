@@ -18,23 +18,25 @@ interface Project {
 }
 
 interface ProjectFormData {
-  title: string;
-  description: string;
+  title_tr: string;
+  title_en: string;
+  description_tr: string;
+  description_en: string;
   category: string;
   image: string;
   technologies: string;
-    liveUrl: string;
+  liveUrl: string;
   githubUrl: string;
-}
-
-export default function PortfolioAdmin() {
+}export default function PortfolioAdmin() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [formData, setFormData] = useState<ProjectFormData>({
-    title: '',
-    description: '',
+    title_tr: '',
+    title_en: '',
+    description_tr: '',
+    description_en: '',
     category: 'web',
     image: '',
     technologies: '',
@@ -100,9 +102,13 @@ export default function PortfolioAdmin() {
 
   function handleEdit(project: Project) {
     setEditingProject(project);
+    const titleData = JSON.parse(project.title);
+    const descData = JSON.parse(project.description);
     setFormData({
-      title: project.title,
-      description: project.description,
+      title_tr: titleData.tr || '',
+      title_en: titleData.en || '',
+      description_tr: descData.tr || '',
+      description_en: descData.en || '',
       category: project.category,
       image: project.image,
       technologies: project.technologies,
@@ -116,8 +122,10 @@ export default function PortfolioAdmin() {
     setShowModal(false);
     setEditingProject(null);
     setFormData({
-      title: '',
-      description: '',
+      title_tr: '',
+      title_en: '',
+      description_tr: '',
+      description_en: '',
       category: 'web',
       image: '',
       technologies: '',
@@ -153,7 +161,10 @@ export default function PortfolioAdmin() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project) => (
+          {projects.map((project) => {
+            const titleData = JSON.parse(project.title);
+            const descData = JSON.parse(project.description);
+            return (
             <div
               key={project.id}
               className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition"
@@ -162,21 +173,21 @@ export default function PortfolioAdmin() {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={project.image}
-                  alt={project.title}
+                  alt={titleData.tr || titleData.en}
                   className="w-full h-48 object-cover"
                 />
               )}
               <div className="p-4">
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    {project.title}
+                    {titleData.tr || titleData.en}
                   </h3>
                   <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded">
                     {project.category}
                   </span>
                 </div>
                 <p className="text-gray-600 dark:text-gray-300 text-sm mb-3 line-clamp-2">
-                  {project.description}
+                  {descData.tr || descData.en}
                 </p>
                 <div className="mb-3">
                   <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -201,7 +212,8 @@ export default function PortfolioAdmin() {
                 </div>
               </div>
             </div>
-          ))}
+          );
+          })}
         </div>
       )}
 
@@ -222,30 +234,60 @@ export default function PortfolioAdmin() {
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Başlık
-                </label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                  required
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Başlık (Türkçe) *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.title_tr}
+                    onChange={(e) => setFormData({ ...formData, title_tr: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Title (English) *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.title_en}
+                    onChange={(e) => setFormData({ ...formData, title_en: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                    required
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Açıklama
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                  required
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Açıklama (Türkçe) *
+                  </label>
+                  <textarea
+                    value={formData.description_tr}
+                    onChange={(e) => setFormData({ ...formData, description_tr: e.target.value })}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Description (English) *
+                  </label>
+                  <textarea
+                    value={formData.description_en}
+                    onChange={(e) => setFormData({ ...formData, description_en: e.target.value })}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                    required
+                  />
+                </div>
               </div>
 
               <div>
