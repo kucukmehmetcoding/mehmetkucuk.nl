@@ -159,7 +159,7 @@ export async function POST(request: Request) {
 
     console.log("Fal.ai response:", result.data);
 
-    const outputText = result.data.output || result.data.content || "";
+    const outputText = (result.data.output || (result.data as any).content || "") as string;
 
     // Check for lead capture tag
     const leadMatch = outputText.match(/\[LEAD_CAPTURED\]:\s*({.*})/);

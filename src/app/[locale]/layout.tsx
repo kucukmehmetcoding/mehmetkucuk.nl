@@ -78,9 +78,9 @@ export async function generateMetadata({
         'max-snippet': -1,
       },
     },
-    icons: {
+    icons: settings.faviconUrl ? {
       icon: settings.faviconUrl,
-    },
+    } : undefined,
   };
 }
 
