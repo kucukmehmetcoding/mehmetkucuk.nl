@@ -48,6 +48,12 @@ export default async function AdminLayout({
               </Link>
             </li>
             <li>
+              <Link href="/admin/blog" className="flex items-center p-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-colors duration-200">
+                <span className="mr-3">📝</span>
+                Blog
+              </Link>
+            </li>
+            <li>
               <Link href="/admin/languages" className="flex items-center p-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-colors duration-200">
                 <span className="mr-3">🌍</span>
                 Languages

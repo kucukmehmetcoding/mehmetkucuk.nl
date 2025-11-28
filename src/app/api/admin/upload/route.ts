@@ -62,10 +62,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
   }
 }
-
-// Configure the API route to handle large files
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};

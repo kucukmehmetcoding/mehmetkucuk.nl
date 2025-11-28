@@ -109,3 +109,33 @@ model Settings {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  slug        String   @unique // URL-friendly slug
+  title       String   // Multilingual title as JSON string
+  excerpt     String   // Multilingual excerpt as JSON string
+  content     String   // Multilingual content as JSON string (Markdown)
+  coverImage  String?  // Cover image URL
+  author      String   @default("Mehmet Küçük")
+  category    String   // e.g., 'web-development', 'ai', 'tutorial'
+  tags        String   // Comma-separated tags
+  published   Boolean  @default(false)
+  featured    Boolean  @default(false)
+  views       Int      @default(0)
+  readingTime Int      @default(5) // Reading time in minutes
+  metaTitle   String?  // SEO meta title (multilingual JSON)
+  metaDesc    String?  // SEO meta description (multilingual JSON)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  publishedAt DateTime?
+}
+
+model BlogCategory {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String   // Multilingual name as JSON string
+  description String?  // Multilingual description as JSON string
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

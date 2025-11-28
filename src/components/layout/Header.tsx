@@ -29,6 +29,7 @@ export default function Header({ locale }: { locale: string }) {
     { href: '/', label: t('home') },
     { href: '/services', label: t('services') },
     { href: '/portfolio', label: t('portfolio') },
+    { href: '/blog', label: t('blog') },
     { href: '/about', label: t('about') },
     { href: '/contact', label: t('contact') },
   ];
