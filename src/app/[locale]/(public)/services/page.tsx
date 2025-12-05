@@ -1,7 +1,8 @@
 import { useTranslations } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import { Monitor, Code, Bot, CheckCircle2, ArrowRight } from 'lucide-react';
-import {Link} from '@/i18n/routing';
+import { Link } from '@/i18n/routing';
+import ServiceSchema from '@/components/ServiceSchema';
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
@@ -16,7 +17,8 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
   };
 }
 
-export default function ServicesPage() {
+export default async function ServicesPage({params}: {params: Promise<{locale: string}>}) {
+  const {locale} = await params;
   const t = useTranslations('ServicesPage');
   const tNav = useTranslations('Navigation');
 
@@ -42,7 +44,18 @@ export default function ServicesPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white py-20 px-4 sm:px-6 lg:px-8">
+    <>
+      {/* Schema Markup for Services */}
+      <ServiceSchema
+        name={locale === 'tr' ? 'Web ve Yazılım Geliştirme Hizmetleri' : locale === 'nl' ? 'Web- en softwareontwikkelingsdiensten' : 'Web and Software Development Services'}
+        description={locale === 'tr' ? 'Profesyonel web tasarım, özel yazılım geliştirme ve AI chatbot çözümleri. Rotterdam, Hollanda merkezli freelance hizmetler.' : locale === 'nl' ? 'Professionele webdesign, aangepaste softwareontwikkeling en AI-chatbotoplossingen. Freelance diensten gevestigd in Rotterdam, Nederland.' : 'Professional web design, custom software development, and AI chatbot solutions. Freelance services based in Rotterdam, Netherlands.'}
+        provider="Mehmet Küçük"
+        areaServed="Netherlands, Europe"
+        serviceType="Web Development, Software Engineering, AI Solutions"
+        url={`https://mehmetkucuk.nl/${locale}/services`}
+      />
+      
+      <div className="min-h-screen bg-white py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-16">
@@ -117,5 +130,6 @@ export default function ServicesPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

@@ -1,22 +1,71 @@
-import { useTranslations } from 'next-intl';
-import { getTranslations } from 'next-intl/server';
-import { Mail, MapPin, Send } from 'lucide-react';
+'use client';
 
-export async function generateMetadata({params}: {params: Promise<{locale: string}>}) {
-  const {locale} = await params;
-  const t = await getTranslations({locale, namespace: 'SEO'});
-
-  return {
-    title: t('contactTitle'),
-    description: t('contactDescription'),
-    alternates: {
-      canonical: `/${locale}/contact`,
-    }
-  };
-}
+import { useState } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
+import { Mail, MapPin, Send, CheckCircle, AlertCircle } from 'lucide-react';
 
 export default function ContactPage() {
   const t = useTranslations('Contact');
+  const locale = useLocale();
+  
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    subject: '',
+    message: '',
+  });
+  
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.id]: e.target.value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus('loading');
+    setErrorMessage('');
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          locale,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send message');
+      }
+
+      setStatus('success');
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: '',
+      });
+
+      // Reset success message after 5 seconds
+      setTimeout(() => setStatus('idle'), 5000);
+    } catch (error) {
+      setStatus('error');
+      setErrorMessage(error instanceof Error ? error.message : 'An error occurred');
+      setTimeout(() => setStatus('idle'), 5000);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white pt-20 pb-12 px-4 sm:px-6 lg:px-8">
@@ -66,7 +115,27 @@ export default function ContactPage() {
 
           {/* Contact Form */}
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 lg:p-12">
-            <form className="space-y-6">
+            {status === 'success' && (
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
+                <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                <div>
+                  <h3 className="font-medium text-green-900">{t('successTitle') || 'Message Sent!'}</h3>
+                  <p className="text-sm text-green-700">{t('successMessage') || 'Thank you for your message. I will get back to you soon.'}</p>
+                </div>
+              </div>
+            )}
+            
+            {status === 'error' && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
+                <div>
+                  <h3 className="font-medium text-red-900">{t('errorTitle') || 'Error'}</h3>
+                  <p className="text-sm text-red-700">{errorMessage || t('errorMessage') || 'Failed to send message. Please try again.'}</p>
+                </div>
+              </div>
+            )}
+            
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
@@ -75,6 +144,9 @@ export default function ContactPage() {
                   <input
                     type="text"
                     id="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                     placeholder="Adınız Soyadınız"
                   />
@@ -86,10 +158,27 @@ export default function ContactPage() {
                   <input
                     type="email"
                     id="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                     placeholder="ornek@sirket.com"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('formPhone') || 'Phone (Optional)'}
+                </label>
+                <input
+                  type="tel"
+                  id="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                  placeholder="+31 6 12345678"
+                />
               </div>
 
               <div>
@@ -98,6 +187,9 @@ export default function ContactPage() {
                 </label>
                 <select
                   id="subject"
+                  value={formData.subject}
+                  onChange={handleChange}
+                  required
                   className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-white"
                 >
                   <option value="">{t('formSelectSubject')}</option>
@@ -115,6 +207,9 @@ export default function ContactPage() {
                 <textarea
                   id="message"
                   rows={4}
+                  value={formData.message}
+                  onChange={handleChange}
+                  required
                   className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
                   placeholder={t('formMessagePlaceholder')}
                 ></textarea>
@@ -122,9 +217,10 @@ export default function ContactPage() {
 
               <button
                 type="submit"
-                className="w-full flex items-center justify-center space-x-2 bg-blue-600 text-white px-8 py-4 rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg"
+                disabled={status === 'loading'}
+                className="w-full flex items-center justify-center space-x-2 bg-blue-600 text-white px-8 py-4 rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span>{t('formButton')}</span>
+                <span>{status === 'loading' ? (locale === 'tr' ? 'Gönderiliyor...' : locale === 'nl' ? 'Verzenden...' : 'Sending...') : t('formButton')}</span>
                 <Send className="h-5 w-5" />
               </button>
             </form>

@@ -1,7 +1,14 @@
 import nodemailer from 'nodemailer';
 import { prisma } from '@/lib/prisma';
 
-export async function sendEmail(to: string, subject: string, text: string) {
+interface EmailOptions {
+  to: string;
+  subject: string;
+  text?: string;
+  html?: string;
+}
+
+export async function sendEmail({ to, subject, text, html }: EmailOptions) {
   // Fetch SMTP settings from the database
   const settings = await prisma.settings.findFirst();
   if (!settings) {
@@ -22,6 +29,7 @@ export async function sendEmail(to: string, subject: string, text: string) {
     to,
     subject,
     text,
+    html,
   };
 
   await transporter.sendMail(mailOptions);
@@ -39,7 +47,7 @@ export async function sendLeadNotification(leadData: { name: string; phone: stri
   // For now, send to the SMTP user as the admin
   const settings = await prisma.settings.findFirst();
   if (settings && settings.smtpUser) {
-      await sendEmail(settings.smtpUser, subject, text);
+      await sendEmail({ to: settings.smtpUser, subject, text });
   } else {
       console.warn("Cannot send lead notification: SMTP settings or user not found.");
   }
