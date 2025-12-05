@@ -12,16 +12,28 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'blog' });
+
+  const title = locale === 'tr' 
+    ? 'Blog - Web Geliştirme ve Teknoloji Yazıları'
+    : locale === 'nl'
+    ? 'Blog - Webontwikkeling en Technologie Artikelen'
+    : 'Blog - Web Development and Technology Articles';
+    
+  const description = locale === 'tr'
+    ? 'Web geliştirme, tasarım ve teknoloji hakkında yazılar. Next.js, React, TypeScript ve modern web teknolojileri.'
+    : locale === 'nl'
+    ? 'Artikelen over webontwikkeling, ontwerp en technologie. Next.js, React, TypeScript en moderne webtechnologieën.'
+    : 'Articles about web development, design and technology. Next.js, React, TypeScript and modern web technologies.';
 
   return {
-    title: t('metaTitle'),
-    description: t('metaDescription'),
+    title,
+    description,
     alternates: {
       canonical: `/${locale}/blog`,
       languages: {
         tr: '/tr/blog',
         en: '/en/blog',
+        nl: '/nl/blog',
       },
     },
   };
