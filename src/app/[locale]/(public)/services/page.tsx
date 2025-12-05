@@ -1,4 +1,3 @@
-import { useTranslations } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import { Monitor, Code, Bot, CheckCircle2, ArrowRight } from 'lucide-react';
 import { Link } from '@/i18n/routing';
@@ -19,8 +18,8 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
 
 export default async function ServicesPage({params}: {params: Promise<{locale: string}>}) {
   const {locale} = await params;
-  const t = useTranslations('ServicesPage');
-  const tNav = useTranslations('Navigation');
+  const t = await getTranslations({locale, namespace: 'ServicesPage'});
+  const tNav = await getTranslations({locale, namespace: 'Navigation'});
 
   const services = [
     {
