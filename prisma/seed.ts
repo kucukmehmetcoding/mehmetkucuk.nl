@@ -76,44 +76,54 @@ async function seedArticle() {
 }
 
 async function seedBotSettings() {
-  const settings = await prisma.botSettings.upsert({
-    where: { id: 1 },
-    update: {},
-    create: {
+  // Check if settings already exist
+  const existing = await prisma.botSettings.findFirst();
+  
+  if (existing) {
+    console.log('🤖 Bot settings already exist, skipping...');
+    return existing;
+  }
+
+  const settings = await prisma.botSettings.create({
+    data: {
       isEnabled: false,
-      cronSchedule: '0 */4 * * *',
-      newsPerRun: 5,
-      preferredCategories: ['ai', 'programming', 'science'],
-      preferredLanguages: ['tr', 'en', 'nl'],
+      highPriorityInterval: 5,
+      mediumPriorityInterval: 15,
+      lowPriorityInterval: 30,
+      dailyArticleTarget: 50,
+      maxArticlesPerHour: 10,
+      minQaScore: 0.85,
+      autoPublish: false,
+      simHashThreshold: 3,
+      crossSourceDedup: true,
+      enablePaywallFilter: true,
     }
   });
 
-  console.log('🤖 Bot settings ensured, enabled:', settings.isEnabled);
+  console.log('🤖 Bot settings created, enabled:', settings.isEnabled);
   return settings;
 }
 
 async function seedSiteSettings() {
-  const settings = await prisma.siteSettings.upsert({
-    where: { id: 1 },
-    update: {},
-    create: {
-      siteName: 'MK News',
-      siteDescription: 'AI-powered news platform',
-      siteUrl: 'https://mehmetkucuk.nl',
-      contactEmail: 'info@mehmetkucuk.nl',
-      socialLinks: {
-        twitter: 'https://twitter.com/mehmetkucuknl',
-        linkedin: 'https://linkedin.com/in/mehmetkucuk',
-        github: 'https://github.com/mehmetkucuk'
-      },
-      analyticsId: null,
-      enableComments: false,
-      enableNewsletter: false,
-    }
-  });
+  // Seed key-value site settings
+  const defaultSettings = [
+    { key: 'site_name', value: 'MK News', group: 'general' as const, label: 'Site Name' },
+    { key: 'site_description', value: 'AI-powered news platform', group: 'general' as const, label: 'Site Description' },
+    { key: 'site_url', value: 'https://mehmetkucuk.nl', group: 'general' as const, label: 'Site URL' },
+    { key: 'contact_email', value: 'info@mehmetkucuk.nl', group: 'general' as const, label: 'Contact Email' },
+    { key: 'enable_comments', value: 'false', type: 'boolean', group: 'general' as const, label: 'Enable Comments' },
+    { key: 'enable_newsletter', value: 'false', type: 'boolean', group: 'general' as const, label: 'Enable Newsletter' },
+  ];
 
-  console.log('⚙️ Site settings ensured:', settings.siteName);
-  return settings;
+  for (const setting of defaultSettings) {
+    await prisma.siteSetting.upsert({
+      where: { key: setting.key },
+      update: {},
+      create: setting,
+    });
+  }
+
+  console.log('⚙️ Site settings seeded:', defaultSettings.length, 'settings');
 }
 
 async function main() {
