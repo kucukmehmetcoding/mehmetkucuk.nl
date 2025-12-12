@@ -3,6 +3,9 @@ import { prisma } from '@/lib/prisma';
 
 export const runtime = 'nodejs';
 
+// Force dynamic rendering - database required at runtime
+export const dynamic = 'force-dynamic';
+
 // Cache for 5 minutes
 export const revalidate = 300;
 

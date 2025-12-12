@@ -10,6 +10,9 @@ import {getCategoryName} from '@/lib/categories';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://mehmetkucuk.nl';
 
+// Force dynamic rendering - database required at runtime
+export const dynamic = 'force-dynamic';
+
 // ISR: Revalidate every 60 seconds for published articles
 export const revalidate = 60;
 

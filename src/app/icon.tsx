@@ -2,6 +2,10 @@ import { ImageResponse } from 'next/og';
 import { prisma } from '@/lib/prisma';
 
 export const runtime = 'nodejs';
+
+// Force dynamic rendering - database required at runtime
+export const dynamic = 'force-dynamic';
+
 export const contentType = 'image/png';
 export const size = { width: 32, height: 32 };
 

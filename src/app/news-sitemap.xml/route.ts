@@ -1,6 +1,9 @@
 import {NextResponse} from 'next/server';
 import {prisma} from '@/lib/prisma';
 
+// Force dynamic rendering - database required at runtime
+export const dynamic = 'force-dynamic';
+
 // Google News Sitemap - revalidate every hour
 export const revalidate = 3600;
 
