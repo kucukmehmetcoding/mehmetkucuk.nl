@@ -5,9 +5,11 @@ nixPkgs = ["nodejs_22"]
 
 [phases.install]
 cmds = ["npm ci"]
+cacheDirectories = []
 
 [phases.build]
 cmds = ["npx prisma generate", "npm run build"]
+cacheDirectories = []
 
 [start]
 cmd = "npx prisma migrate deploy && npx prisma db seed && node .next/standalone/server.js"
