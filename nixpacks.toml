@@ -12,7 +12,7 @@ cmds = ["npx prisma generate", "npm run build"]
 cacheDirectories = []
 
 [start]
-cmd = "npx prisma migrate deploy && npx prisma db seed && node .next/standalone/server.js"
+cmd = "PORT=3000 npx prisma migrate deploy && npx prisma db seed && PORT=3000 node .next/standalone/server.js"
 
 [variables]
 NODE_ENV = "production"
