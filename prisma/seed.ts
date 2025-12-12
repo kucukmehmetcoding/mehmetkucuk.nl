@@ -1,34 +1,86 @@
-import { PrismaClient } from '@prisma/client';
+import {PrismaClient, Language} from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-async function main() {
-  console.log('🌱 Starting database seed...');
-
-  // Admin kullanıcısını oluştur veya güncelle
+async function ensureAdmin() {
   const adminEmail = process.env.ADMIN_EMAIL || 'admin@mehmetkucuk.nl';
   const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
-
   const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
   const admin = await prisma.user.upsert({
-    where: { email: adminEmail },
-    update: {
-      password: hashedPassword,
-    },
+    where: {email: adminEmail},
+    update: {password: hashedPassword},
     create: {
       email: adminEmail,
       name: 'Admin',
       password: hashedPassword,
-      role: 'admin',
-    },
+      role: 'admin'
+    }
   });
 
-  console.log('✅ Admin user created/updated:', admin.email);
-  console.log('📧 Email:', adminEmail);
-  console.log('🔑 Password:', adminPassword);
-  console.log('\n⚠️  Make sure to change the default password after first login!');
+  console.log('✅ Admin user ensured:', admin.email);
+  return {adminEmail, adminPassword};
+}
+
+async function seedArticle() {
+  const now = new Date();
+
+  const article = await prisma.article.upsert({
+    where: {slug: 'sample-ai-briefing'},
+    update: {},
+    create: {
+      slug: 'sample-ai-briefing',
+      category: 'ai',
+      tags: ['ai', 'research'],
+      imageUrl: 'https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d',
+      published: true,
+      publishedAt: now,
+      translations: {
+        create: [
+          {
+            lang: Language.tr,
+            slug: 'yapay-zekada-haftanin-ozeti',
+            title: 'Yapay zekada haftanın özeti',
+            summary: 'Yeni çip tasarımları eğitim maliyetini yarıya indiriyor, regülasyon cephesinde ise Avrupa yeni kurallar yayımladı.',
+            body: '<p>Yeni nesil hızlandırıcılar inferans başına enerji tüketimini %30 azaltıyor.</p><p>Aynı zamanda, Avrupa Komisyonu üretken yapay zekâ için şeffaflık yükümlülükleri getirdi.</p>',
+            author: 'MK News Bot',
+            seoTitle: 'Yapay zekâ gündeminde öne çıkanlar',
+            metaDescription: 'Haftanın yapay zekâ haberleri: çip verimliliği ve regülasyon güncellemeleri.'
+          },
+          {
+            lang: Language.en,
+            slug: 'weekly-ai-briefing',
+            title: 'Weekly AI briefing',
+            summary: 'Hardware teams halve training costs while regulators push for higher transparency.',
+            body: '<p>Vendors introduced accelerators that trim inference latency without sacrificing accuracy.</p><p>The EU also outlined new disclosure rules for generative systems.</p>',
+            author: 'MK News Bot',
+            seoTitle: 'AI briefing of the week',
+            metaDescription: 'Key AI developments across hardware, regulation, and enterprise adoption.'
+          }
+        ]
+      },
+      source: {
+        create: {
+          originalSource: 'MK News Desk',
+          sourceUrl: 'https://mehmetkucuk.nl/tr/news/sample-ai-briefing',
+          sourceFingerprint: 'seed-sample-source',
+          language: 'tr',
+          wordCount: 420
+        }
+      }
+    }
+  });
+
+  console.log('📰 Seeded sample article:', article.slug);
+}
+
+async function main() {
+  console.log('🌱 Starting database seed...');
+  const creds = await ensureAdmin();
+  await seedArticle();
+  console.log('📧 Default admin email:', creds.adminEmail);
+  console.log('🔑 Default admin password:', creds.adminPassword);
 }
 
 main()

@@ -1,0 +1,29 @@
+{
+  "name": "MK News Intelligence",
+  "short_name": "MK News",
+  "description": "Multilingual, AI-assisted developer newswire for tech professionals",
+  "start_url": "/tr",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["news", "technology"],
+  "lang": "tr",
+  "dir": "ltr",
+  "scope": "/",
+  "prefer_related_applications": false
+}

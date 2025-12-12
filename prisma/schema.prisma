@@ -1,141 +1,366 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?
-  access_token       String?
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?
-  session_state      String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
+enum ApprovalStatus {
+  pending
+  approved
+  rejected
 }
 
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+enum Language {
+  tr
+  en
+  nl
+}
+
+model Article {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  category    String
+  tags        String[]
+  imageUrl    String?
+  published   Boolean       @default(false)
+  publishedAt DateTime?
+  mode        String        @default("mode_b")
+  qaScore     Float?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  translations Translation[]
+  source        Source?
+
+  @@index([category])
+  @@index([published, publishedAt])
+}
+
+model Translation {
+  id              String          @id @default(cuid())
+  lang            Language
+  slug            String          // SEO-friendly URL slug for this language
+  title           String
+  summary         String
+  body            String
+  author          String
+  seoTitle        String
+  metaDescription String
+  canonicalUrl    String?
+  publishedAt     DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  article   Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  articleId String
+
+  approval ApprovalQueue?
+
+  @@unique([articleId, lang])
+  @@unique([lang, slug])  // Each language has unique slugs
+  @@index([slug])         // Fast lookup by slug
+}
+
+model Source {
+  id                String   @id @default(cuid())
+  articleId         String   @unique
+  originalSource    String
+  sourceUrl         String
+  fetchedAt         DateTime @default(now())
+  sourceFingerprint String   @unique
+  language          String
+  wordCount         Int
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+}
+
+model ApprovalQueue {
+  id               String          @id @default(cuid())
+  status           ApprovalStatus  @default(pending)
+  reviewerId       String?
+  notes            String?
+  scoreReadability Float?
+  scoreSimilarity  Float?
+  toxicityFlag     Boolean        @default(false)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  translationId String   @unique
+  translation   Translation @relation(fields: [translationId], references: [id], onDelete: Cascade)
+}
+
+model MetricLog {
+  id        String   @id @default(cuid())
+  key       String
+  value     Float
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([key, createdAt])
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  password      String?
-  image         String?
-  role          String    @default("user") // admin, user
-  accounts      Account[]
-  sessions      Session[]
-}
-
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
-
-  @@unique([identifier, token])
-}
-
-model Lead {
   id        String   @id @default(cuid())
+  email     String   @unique
   name      String?
-  email     String?
-  phone     String?
-  notes     String?
-  source    String   @default("chat") // chat, contact_form
-  status    String   @default("new") // new, contacted, closed
+  password  String
+  role      String   @default("admin")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model SeoSetting {
-  id          String   @id @default(cuid())
-  path        String   @unique // e.g. /tr, /en/services
-  title       String
-  description String
-  keywords    String?
-  updatedAt   DateTime @updatedAt
+model Category {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  translations CategoryTranslation[]
+}
+
+model CategoryTranslation {
+  id         String   @id @default(cuid())
+  lang       Language
+  name       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId String
+
+  @@unique([categoryId, lang])
+}
+
+// ==========================================
+// Site Settings & Configuration Models
+// ==========================================
+
+enum SettingGroup {
+  general
+  seo
+  appearance
+  advanced
+  social
 }
 
 model SiteSetting {
-  id          String   @id @default(cuid())
-  key         String   @unique // e.g. google_analytics_id
-  value       String
+  id        String       @id @default(cuid())
+  key       String       @unique
+  value     String       @db.Text
+  type      String       @default("string") // string, boolean, number, json
+  group     SettingGroup @default(general)
+  label     String?      // Human-readable label
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([group])
+}
+
+model SmtpSetting {
+  id        String   @id @default(cuid())
+  host      String
+  port      Int      @default(587)
+  secure    Boolean  @default(false)
+  username  String
+  password  String   // Encrypted
+  fromEmail String
+  fromName  String
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ==========================================
+// Advertisement Models
+// ==========================================
+
+enum AdProvider {
+  custom
+  google_adsense
+  google_admanager
+}
+
+enum AdPlacement {
+  header
+  sidebar_top
+  sidebar_bottom
+  footer
+  in_article
+  between_posts
+  popup
+  sticky_bottom
+}
+
+model AdSlot {
+  id          String      @id @default(cuid())
+  name        String
+  placement   AdPlacement
   description String?
+  width       Int?
+  height      Int?
+  isActive    Boolean     @default(true)
+  priority    Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  advertisements Advertisement[]
+
+  @@unique([placement])
 }
 
-model Project {
-  id          String   @id @default(cuid())
-  title       String   // Multilingual title as JSON string (e.g., '{"en": "Title", "tr": "Başlık"}')
-  description String   // Multilingual description as JSON string
-  category    String   // e.g., 'web', 'software', 'ai'
-  image       String   // Image URL
-  technologies String   // Comma-separated list of technologies used
-  liveUrl     String?  // Optional live demo URL
-  githubUrl   String?  // Optional GitHub URL
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model Advertisement {
+  id          String     @id @default(cuid())
+  name        String
+  slotId      String
+  slot        AdSlot     @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  provider    AdProvider @default(custom)
+
+  // For custom ads
+  imageUrl    String?
+  linkUrl     String?
+  altText     String?
+
+  // For Google Adsense/AdManager
+  adCode      String?    @db.Text
+  adUnitId    String?
+
+  // Targeting
+  startDate   DateTime?
+  endDate     DateTime?
+  targetLangs String[]   // ["tr", "en", "nl"] or empty for all
+
+  // Analytics
+  impressions Int        @default(0)
+  clicks      Int        @default(0)
+
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([slotId, isActive])
 }
 
-model Settings {
-  id          String   @id @default(cuid())
-  smtpHost    String
-  smtpPort    Int
-  smtpUser    String
-  smtpPass    String
-  logoUrl     String?  // Optional logo URL
-  faviconUrl  String?  // Optional favicon URL
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+// ==========================================
+// RSS Feed & Bot Automation Models
+// ==========================================
+
+enum FeedPriority {
+  high      // Check every 5 minutes
+  medium    // Check every 15 minutes
+  low       // Check every 30 minutes
 }
 
-model BlogPost {
-  id          String   @id @default(cuid())
-  slug        String   @unique // URL-friendly slug
-  title       String   // Multilingual title as JSON string
-  excerpt     String   // Multilingual excerpt as JSON string
-  content     String   // Multilingual content as JSON string (Markdown)
-  coverImage  String?  // Cover image URL
-  author      String   @default("Mehmet Küçük")
-  category    String   // e.g., 'web-development', 'ai', 'tutorial'
-  tags        String   // Comma-separated tags
-  published   Boolean  @default(false)
-  featured    Boolean  @default(false)
-  views       Int      @default(0)
-  readingTime Int      @default(5) // Reading time in minutes
-  metaTitle   String?  // SEO meta title (multilingual JSON)
-  metaDesc    String?  // SEO meta description (multilingual JSON)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  publishedAt DateTime?
+enum FeedStatus {
+  active
+  paused
+  error
 }
 
-model BlogCategory {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  name        String   // Multilingual name as JSON string
-  description String?  // Multilingual description as JSON string
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model RssFeed {
+  id            String       @id @default(cuid())
+  name          String       // e.g., "The Verge"
+  url           String       @unique
+  category      String       // Maps to article category
+  priority      FeedPriority @default(medium)
+  status        FeedStatus   @default(active)
+  
+  // Incremental fetching
+  lastFetchedAt DateTime?
+  lastItemGuid  String?      // Last processed item GUID/link
+  lastItemDate  DateTime?    // Last processed item pubDate
+  
+  // Stats
+  totalFetched  Int          @default(0)
+  totalPublished Int         @default(0)
+  errorCount    Int          @default(0)
+  lastError     String?
+  
+  // Settings
+  maxItemsPerFetch Int       @default(10)
+  language      String       @default("en") // Source language
+  
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  fetchedItems  FetchedItem[]
+
+  @@index([status, priority])
+}
+
+model FetchedItem {
+  id            String   @id @default(cuid())
+  feedId        String
+  feed          RssFeed  @relation(fields: [feedId], references: [id], onDelete: Cascade)
+  
+  guid          String   // RSS item guid or link
+  title         String
+  link          String
+  pubDate       DateTime?
+  contentHash   String   // For cross-source deduplication
+  simHash       String   // SimHash for similarity detection
+  
+  // Content storage for AI processing
+  body          String?  @db.Text  // Full article body
+  summary       String?  @db.Text  // Article summary
+  
+  // Processing status
+  processed     Boolean  @default(false)
+  articleId     String?  // If processed, link to article
+  skippedReason String?  // "duplicate", "low_quality", etc.
+  
+  createdAt     DateTime @default(now())
+
+  @@unique([feedId, guid])
+  @@index([contentHash])
+  @@index([simHash])
+  @@index([processed, createdAt])
+}
+
+model BotSettings {
+  id                    String   @id @default(cuid())
+  
+  // Scheduler settings
+  isEnabled             Boolean  @default(true)
+  highPriorityInterval  Int      @default(5)  // minutes
+  mediumPriorityInterval Int     @default(15) // minutes
+  lowPriorityInterval   Int      @default(30) // minutes
+  
+  // Daily limits
+  dailyArticleTarget    Int      @default(50)
+  maxArticlesPerHour    Int      @default(10)
+  
+  // Quality settings
+  minQaScore            Float    @default(0.85)
+  autoPublish           Boolean  @default(true)
+  
+  // Deduplication
+  simHashThreshold      Int      @default(3)  // Hamming distance
+  crossSourceDedup      Boolean  @default(true)
+  
+  // Paywall/Clickbait filtering
+  enablePaywallFilter   Boolean  @default(true)
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model BotRunLog {
+  id            String   @id @default(cuid())
+  priority      FeedPriority
+  startedAt     DateTime @default(now())
+  completedAt   DateTime?
+  
+  // Stats
+  feedsChecked  Int      @default(0)
+  itemsFetched  Int      @default(0)
+  itemsProcessed Int     @default(0)
+  itemsPublished Int     @default(0)
+  itemsSkipped  Int      @default(0)
+  
+  errors        String[] @default([])
+  
+  @@index([startedAt])
 }

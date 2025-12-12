@@ -1,0 +1,22 @@
+# ads.txt - Authorized Digital Sellers
+# More info: https://iabtechlab.com/ads-txt/
+# 
+# This file declares which advertising networks are authorized to sell 
+# ad inventory on mehmetkucuk.nl
+#
+# Format: <domain>, <publisher_id>, <relationship>, [certification_authority_id]
+#
+# Replace pub-XXXXXXXXXXXXXXXX with your actual Google AdSense Publisher ID
+# You can find your publisher ID in your AdSense account:
+# AdSense > Account > Account Information > Publisher ID
+
+# Google AdSense
+google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
+
+# Google Ad Manager (if used)
+# google.com, pub-XXXXXXXXXXXXXXXX, RESELLER, f08c47fec0942fa0
+
+# Add other authorized sellers below as needed
+# Example for other networks:
+# advertising-network.com, publisher-id-123, DIRECT
+# ad-exchange.com, exchange-id-456, RESELLER, certification-id

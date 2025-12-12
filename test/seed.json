@@ -1,0 +1,19 @@
+{
+  "dry_run": false,
+  "items": [
+    {
+      "source_url": "https://sample.mehmetkucuk.nl/news/ai-chips",
+      "category": "ai",
+      "tags": ["ai", "hardware"],
+      "mode": "manual"
+    },
+    {
+      "title_tr": "Veri gözlemlenebilirliği maliyetleri düşürüyor",
+      "summary_tr": "Yeni platform üretim ekiplerine gerçek zamanlı görünürlük sağlıyor.",
+      "body_tr": "<p>Yeni araç zincirindeki servislerin maliyetini saniyeler içinde hesaplıyor.</p>",
+      "category": "cloud",
+      "tags": ["observability", "sre"],
+      "mode": "auto"
+    }
+  ]
+}

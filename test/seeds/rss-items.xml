@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>MK Sample Feed</title>
+    <link>https://sample.mehmetkucuk.nl</link>
+    <description>Seed feed for local QA</description>
+    <item>
+      <title>AI chips reach new efficiency</title>
+      <link>https://sample.mehmetkucuk.nl/news/ai-chips</link>
+      <pubDate>Mon, 01 Jan 2024 09:00:00 GMT</pubDate>
+      <description>Vendors announce energy saving inferencing cores.</description>
+    </item>
+    <item>
+      <title>Edge cloud footprint expands</title>
+      <link>https://sample.mehmetkucuk.nl/news/edge-cloud</link>
+      <pubDate>Mon, 01 Jan 2024 10:00:00 GMT</pubDate>
+      <description>Providers deploy PoPs in 15 new cities.</description>
+    </item>
+    <item>
+      <title>Robotics startups raise record rounds</title>
+      <link>https://sample.mehmetkucuk.nl/news/robotics-fund</link>
+      <pubDate>Mon, 01 Jan 2024 11:00:00 GMT</pubDate>
+      <description>Funding rebounds with focus on manufacturing.</description>
+    </item>
+    <item>
+      <title>EU proposes AI watermark mandate</title>
+      <link>https://sample.mehmetkucuk.nl/news/eu-watermark</link>
+      <pubDate>Mon, 01 Jan 2024 12:00:00 GMT</pubDate>
+      <description>Policy targets synthetic media provenance.</description>
+    </item>
+    <item>
+      <title>Quantum networking pilot ships</title>
+      <link>https://sample.mehmetkucuk.nl/news/quantum-net</link>
+      <pubDate>Mon, 01 Jan 2024 13:00:00 GMT</pubDate>
+      <description>Pilot connects Amsterdam and Istanbul labs.</description>
+    </item>
+    <item>
+      <title>AppSec teams adopt AI fuzzing</title>
+      <link>https://sample.mehmetkucuk.nl/news/appsec-ai</link>
+      <pubDate>Mon, 01 Jan 2024 14:00:00 GMT</pubDate>
+      <description>Coverage jumps after autonomous exploit hunts.</description>
+    </item>
+    <item>
+      <title>Data mesh playbooks shared</title>
+      <link>https://sample.mehmetkucuk.nl/news/data-mesh</link>
+      <pubDate>Mon, 01 Jan 2024 15:00:00 GMT</pubDate>
+      <description>Community releases reference pipelines.</description>
+    </item>
+    <item>
+      <title>Observability vendors merge</title>
+      <link>https://sample.mehmetkucuk.nl/news/observability-merge</link>
+      <pubDate>Mon, 01 Jan 2024 16:00:00 GMT</pubDate>
+      <description>Deal targets cloud cost visibility.</description>
+    </item>
+    <item>
+      <title>5G private networks for ports</title>
+      <link>https://sample.mehmetkucuk.nl/news/5g-ports</link>
+      <pubDate>Mon, 01 Jan 2024 17:00:00 GMT</pubDate>
+      <description>Terminals get automation-ready coverage.</description>
+    </item>
+    <item>
+      <title>Open hardware alliance formed</title>
+      <link>https://sample.mehmetkucuk.nl/news/open-hw</link>
+      <pubDate>Mon, 01 Jan 2024 18:00:00 GMT</pubDate>
+      <description>Vendors align on modular boards.</description>
+    </item>
+  </channel>
+</rss>

@@ -1,94 +1,51 @@
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import { NextAuthOptions } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import { prisma } from "@/lib/prisma";
-import bcrypt from "bcryptjs";
+import {cookies} from 'next/headers';
+import {redirect} from 'next/navigation';
 
-export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
-  session: {
-    strategy: "jwt",
-  },
-  pages: {
-    signIn: "/login",
-  },
-  providers: [
-    CredentialsProvider({
-      name: "credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error("Invalid credentials");
-        }
+/**
+ * Admin auth context type
+ */
+export interface AdminContext {
+  isAdmin: boolean;
+  token?: string;
+}
 
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email,
-          },
-        });
+/**
+ * Check if user is authenticated as admin
+ * Used in server components and server actions
+ */
+export async function getAdminContext(): Promise<AdminContext> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('admin_token')?.value;
+  const secret = process.env.ADMIN_JWT_SECRET;
 
-        if (!user || !user.password) {
-          throw new Error("Invalid credentials");
-        }
+  if (!secret || !token || token !== secret) {
+    return {isAdmin: false};
+  }
 
-        const isCorrectPassword = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
+  return {isAdmin: true, token};
+}
 
-        if (!isCorrectPassword) {
-          throw new Error("Invalid credentials");
-        }
+/**
+ * Protected route wrapper - redirects to login if not admin
+ */
+export async function requireAdmin() {
+  const {isAdmin} = await getAdminContext();
+  if (!isAdmin) {
+    redirect('/admin/login');
+  }
+}
 
-        return user;
-      },
-    }),
-  ],
-  callbacks: {
-    async session({ token, session }) {
-      if (token && session.user) {
-        session.user.id = token.id;
-        session.user.name = token.name;
-        session.user.email = token.email;
-        session.user.image = token.picture;
-        session.user.role = token.role;
-      }
-      return session;
-    },
-    async jwt({ token, user }) {
-      if (user) {
-        return {
-          ...token,
-          id: user.id,
-          role: (user as unknown as { role: string }).role,
-        };
-      }
+/**
+ * API auth middleware - validates admin token from Authorization header
+ */
+export function validateAdminToken(authHeader?: string): boolean {
+  if (!authHeader?.startsWith('Bearer ')) {
+    return false;
+  }
 
-      if (!token.email) {
-        return token;
-      }
+  const token = authHeader.slice(7);
+  const secret = process.env.ADMIN_JWT_SECRET;
 
-      const dbUser = await prisma.user.findUnique({
-        where: {
-          email: token.email,
-        },
-      });
-
-      if (!dbUser) {
-        return token;
-      }
-
-      return {
-        id: dbUser.id,
-        name: dbUser.name,
-        email: dbUser.email,
-        picture: dbUser.image,
-        role: dbUser.role,
-      };
-    },
-  },
-};
+  return Boolean(secret && token === secret);
+}
 

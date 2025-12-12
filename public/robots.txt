@@ -1,0 +1,32 @@
+User-agent: *
+Allow: /
+Allow: /tr/
+Allow: /en/
+Allow: /nl/
+Allow: /sitemap.xml
+Allow: /sitemaps/
+
+# Disallow crawling of admin panel
+Disallow: /admin/
+Disallow: /login/
+Disallow: /api/
+
+# Disallow crawling of internal search URLs
+Disallow: /*?*sort=
+Disallow: /*?*filter=
+Disallow: /*?*page=2
+Disallow: /*?*page=3
+
+# Sitemaps
+Sitemap: https://mehmetkucuk.nl/sitemap.xml
+
+# Crawl delay for respectful crawling
+Crawl-delay: 1
+
+# User-Agent specific rules
+User-agent: AdsBot-Google
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0

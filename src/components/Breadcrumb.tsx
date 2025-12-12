@@ -1,82 +1,88 @@
 'use client';
 
-import { ChevronRight, Home } from 'lucide-react';
-import { Link } from '@/i18n/routing';
-import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 
 interface BreadcrumbItem {
   label: string;
-  href: string;
+  href?: string;
 }
 
-export default function Breadcrumb() {
-  const pathname = usePathname();
+interface BreadcrumbProps {
+  items: BreadcrumbItem[];
+  lang: string;
+  siteUrl?: string;
+}
 
-  if (!pathname) return null;
+const homeLabels = {
+  tr: 'Anasayfa',
+  en: 'Home',
+  nl: 'Startpagina',
+};
 
-  const pathSegments = pathname.split('/').filter(Boolean).slice(1); // Remove locale
-  
-  const breadcrumbs: BreadcrumbItem[] = [
-    { label: 'Home', href: '/' },
-  ];
+export default function Breadcrumb({items, lang, siteUrl = 'https://mehmetkucuk.nl'}: BreadcrumbProps) {
+  const homeLabel = homeLabels[lang as keyof typeof homeLabels] || homeLabels.en;
 
-  let currentPath = '';
-  pathSegments.forEach((segment) => {
-    currentPath += `/${segment}`;
-    const label = segment
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-    
-    breadcrumbs.push({
-      label,
-      href: currentPath,
-    });
-  });
-
-  if (breadcrumbs.length === 1) return null; // Don't show on home page
+  // Build JSON-LD structured data
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: homeLabel,
+        item: `${siteUrl}/${lang}`,
+      },
+      ...items.map((item, index) => ({
+        '@type': 'ListItem',
+        position: index + 2,
+        name: item.label,
+        ...(item.href && {
+          item: `${siteUrl}${item.href}`,
+        }),
+      })),
+    ],
+  };
 
   return (
-    <nav aria-label="Breadcrumb" className="bg-gray-50 dark:bg-gray-800/50 py-3 px-4 rounded-lg mb-6">
-      <ol className="flex items-center space-x-2 text-sm flex-wrap" itemScope itemType="https://schema.org/BreadcrumbList">
-        {breadcrumbs.map((crumb, index) => {
-          const isLast = index === breadcrumbs.length - 1;
-          
-          return (
-            <li
-              key={crumb.href}
-              className="flex items-center"
-              itemProp="itemListElement"
-              itemScope
-              itemType="https://schema.org/ListItem"
-            >
-              {index > 0 && (
-                <ChevronRight size={16} className="mx-2 text-gray-400" />
-              )}
-              {isLast ? (
-                <span
-                  className="text-gray-600 dark:text-gray-300 font-medium"
-                  itemProp="name"
-                  aria-current="page"
-                >
-                  {index === 0 && <Home size={16} className="inline mr-1" />}
-                  {crumb.label}
-                </span>
-              ) : (
-                <Link
-                  href={crumb.href}
-                  className="text-blue-600 dark:text-blue-400 hover:underline flex items-center"
-                  itemProp="item"
-                >
-                  {index === 0 && <Home size={16} className="mr-1" />}
-                  <span itemProp="name">{crumb.label}</span>
-                </Link>
-              )}
-              <meta itemProp="position" content={String(index + 1)} />
-            </li>
-          );
-        })}
-      </ol>
-    </nav>
+    <>
+      {/* JSON-LD for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{__html: JSON.stringify(jsonLd)}}
+      />
+
+      {/* Visual Breadcrumb */}
+      <nav
+        aria-label="Breadcrumb"
+        className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 overflow-x-auto py-2"
+      >
+        <Link
+          href={`/${lang}`}
+          className="flex items-center gap-1 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0"
+        >
+          <span>🏠</span>
+          <span className="hidden sm:inline">{homeLabel}</span>
+        </Link>
+
+        {items.map((item, index) => (
+          <span key={index} className="flex items-center gap-2 shrink-0">
+            <span className="text-slate-400">›</span>
+            {item.href ? (
+              <Link
+                href={item.href}
+                className="hover:text-slate-900 dark:hover:text-white transition-colors truncate max-w-[200px]"
+              >
+                {item.label}
+              </Link>
+            ) : (
+              <span className="text-slate-900 dark:text-white font-medium truncate max-w-[200px]">
+                {item.label}
+              </span>
+            )}
+          </span>
+        ))}
+      </nav>
+    </>
   );
 }

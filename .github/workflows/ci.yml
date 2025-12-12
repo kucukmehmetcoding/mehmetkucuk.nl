@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: news
+          POSTGRES_PASSWORD: news
+          POSTGRES_DB: news
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U news" --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+    env:
+      DATABASE_URL: postgresql://news:news@localhost:5432/news?schema=public
+      DIRECT_URL: postgresql://news:news@localhost:5432/news?schema=public
+      REDIS_URL: redis://localhost:6379
+      NEXT_PUBLIC_SITE_URL: https://mehmetkucuk.nl
+      FAL_API_KEY: dummy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm install
+      - run: npx prisma migrate deploy
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test -- --runInBand
+      - run: npm run build
+      - name: Docker build
+        run: docker build -t ghcr.io/kucukmehmetcoding/mk-news:${{ github.sha }} .

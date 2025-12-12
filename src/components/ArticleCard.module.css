@@ -1,0 +1,26 @@
+.card {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1.5rem;
+  background: rgba(4, 8, 20, 0.6);
+  backdrop-filter: blur(12px);
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.title {
+  margin: 0.5rem 0;
+}
+
+.summary {
+  opacity: 0.85;
+}
+
+.meta {
+  color: rgba(255, 255, 255, 0.7);
+}

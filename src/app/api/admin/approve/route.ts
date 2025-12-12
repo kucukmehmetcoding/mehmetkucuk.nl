@@ -1,0 +1,2 @@
+export const dynamic = 'force-dynamic';
+export {POST} from '@/api/admin/approve/route';
