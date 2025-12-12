@@ -45,6 +45,9 @@
     "swiper": "^12.0.3",
     "tailwind-merge": "^3.4.0"
   },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "devDependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@shadcn/ui": "^0.0.4",

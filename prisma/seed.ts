@@ -75,9 +75,52 @@ async function seedArticle() {
   console.log('📰 Seeded sample article:', article.slug);
 }
 
+async function seedBotSettings() {
+  const settings = await prisma.botSettings.upsert({
+    where: { id: 1 },
+    update: {},
+    create: {
+      isEnabled: false,
+      cronSchedule: '0 */4 * * *',
+      newsPerRun: 5,
+      preferredCategories: ['ai', 'programming', 'science'],
+      preferredLanguages: ['tr', 'en', 'nl'],
+    }
+  });
+
+  console.log('🤖 Bot settings ensured, enabled:', settings.isEnabled);
+  return settings;
+}
+
+async function seedSiteSettings() {
+  const settings = await prisma.siteSettings.upsert({
+    where: { id: 1 },
+    update: {},
+    create: {
+      siteName: 'MK News',
+      siteDescription: 'AI-powered news platform',
+      siteUrl: 'https://mehmetkucuk.nl',
+      contactEmail: 'info@mehmetkucuk.nl',
+      socialLinks: {
+        twitter: 'https://twitter.com/mehmetkucuknl',
+        linkedin: 'https://linkedin.com/in/mehmetkucuk',
+        github: 'https://github.com/mehmetkucuk'
+      },
+      analyticsId: null,
+      enableComments: false,
+      enableNewsletter: false,
+    }
+  });
+
+  console.log('⚙️ Site settings ensured:', settings.siteName);
+  return settings;
+}
+
 async function main() {
   console.log('🌱 Starting database seed...');
   const creds = await ensureAdmin();
+  await seedBotSettings();
+  await seedSiteSettings();
   await seedArticle();
   console.log('📧 Default admin email:', creds.adminEmail);
   console.log('🔑 Default admin password:', creds.adminPassword);
