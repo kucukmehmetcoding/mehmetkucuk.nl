@@ -59,17 +59,26 @@ export async function generateMetadata(
   }
 }
 
-export async function generateStaticParams() {
-  // Generate params for each translation's unique slug
-  const translations = await prisma.translation.findMany({
-    where: {article: {published: true}},
-    select: {lang: true, slug: true},
-  });
+// Allow dynamic routes not pre-generated at build time
+export const dynamicParams = true;
 
-  return translations.map((trans) => ({
-    lang: trans.lang as string,
-    slug: trans.slug,
-  }));
+export async function generateStaticParams() {
+  try {
+    // Generate params for each translation's unique slug
+    const translations = await prisma.translation.findMany({
+      where: {article: {published: true}},
+      select: {lang: true, slug: true},
+    });
+
+    return translations.map((trans) => ({
+      lang: trans.lang as string,
+      slug: trans.slug,
+    }));
+  } catch (error) {
+    // Database unavailable during build (e.g., Docker), fall back to dynamic rendering
+    console.warn('[generateStaticParams] Database unavailable, using dynamic rendering');
+    return [];
+  }
 }
 
 export default async function ArticlePage({

@@ -61,24 +61,33 @@ export async function generateMetadata({
   };
 }
 
+// Allow dynamic routes not pre-generated at build time
+export const dynamicParams = true;
+
 export async function generateStaticParams(): Promise<{lang: string; slug: string}[]> {
-  const categories = await prisma.article.findMany({
-    where: {published: true},
-    distinct: ['category'],
-    select: {category: true},
-  });
+  try {
+    const categories = await prisma.article.findMany({
+      where: {published: true},
+      distinct: ['category'],
+      select: {category: true},
+    });
 
-  const params: {lang: string; slug: string}[] = [];
-  for (const {category} of categories) {
-    for (const lang of SUPPORTED_LANGS) {
-      params.push({
-        lang,
-        slug: encodeURIComponent(category),
-      });
+    const params: {lang: string; slug: string}[] = [];
+    for (const {category} of categories) {
+      for (const lang of SUPPORTED_LANGS) {
+        params.push({
+          lang,
+          slug: encodeURIComponent(category),
+        });
+      }
     }
-  }
 
-  return params;
+    return params;
+  } catch (error) {
+    // Database unavailable during build (e.g., Docker), fall back to dynamic rendering
+    console.warn('[generateStaticParams] Database unavailable, using dynamic rendering');
+    return [];
+  }
 }
 
 export default async function CategoryPage({
