@@ -98,7 +98,9 @@ export async function POST() {
     }
     
     // Also ensure bot settings exist
-    const settingsExist = await prisma.botSettings.findFirst();
+    const settingsExist = await prisma.botSettings.findFirst({
+      orderBy: { updatedAt: 'desc' },
+    });
     if (!settingsExist) {
       await prisma.botSettings.create({
         data: {
@@ -133,7 +135,9 @@ export async function POST() {
 export async function GET() {
   try {
     const feedCount = await prisma.rssFeed.count();
-    const settingsExist = await prisma.botSettings.findFirst();
+    const settingsExist = await prisma.botSettings.findFirst({
+      orderBy: { updatedAt: 'desc' },
+    });
     
     return NextResponse.json({
       feedsInDatabase: feedCount,

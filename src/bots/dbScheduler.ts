@@ -25,7 +25,9 @@ let lastDayReset = new Date().getDate();
  * Load bot settings from database
  */
 async function loadSettings(): Promise<BotSettings> {
-  const dbSettings = await prisma.botSettings.findFirst();
+  const dbSettings = await prisma.botSettings.findFirst({
+    orderBy: { updatedAt: 'desc' },
+  });
   
   if (!dbSettings) {
     // Create default settings

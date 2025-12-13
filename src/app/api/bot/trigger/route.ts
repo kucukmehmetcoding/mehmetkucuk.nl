@@ -12,7 +12,9 @@ export async function POST(request: Request) {
     const priority: FeedPriority = body.priority || 'high';
     
     // Check if bot is enabled
-    const settings = await prisma.botSettings.findFirst();
+    const settings = await prisma.botSettings.findFirst({
+      orderBy: { updatedAt: 'desc' },
+    });
     if (!settings?.isEnabled) {
       return NextResponse.json({ error: 'Bot is disabled' }, { status: 400 });
     }
@@ -97,7 +99,9 @@ export async function POST(request: Request) {
 // GET /api/bot/trigger - Get bot status
 export async function GET() {
   try {
-    const settings = await prisma.botSettings.findFirst();
+    const settings = await prisma.botSettings.findFirst({
+      orderBy: { updatedAt: 'desc' },
+    });
     const dailyStats = await getDailyStats();
     
     // Get recent run logs

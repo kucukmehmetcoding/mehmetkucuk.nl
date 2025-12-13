@@ -86,7 +86,7 @@ async function seedBotSettings() {
 
   const settings = await prisma.botSettings.create({
     data: {
-      isEnabled: false,
+      isEnabled: true,
       highPriorityInterval: 5,
       mediumPriorityInterval: 15,
       lowPriorityInterval: 30,

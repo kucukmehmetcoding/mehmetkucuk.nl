@@ -1,25 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import sharp from 'sharp';
+import fs from 'node:fs';
+import path from 'node:path';
 
 export const runtime = 'nodejs';
-
-const bucket = process.env.ASSET_BUCKET ?? '';
-const region = process.env.ASSET_REGION ?? 'auto';
-const endpoint = process.env.ASSET_ENDPOINT;
-const publicUrl = process.env.ASSET_PUBLIC_URL;
-
-const s3 = new S3Client({
-  region,
-  endpoint,
-  forcePathStyle: true,
-  credentials: process.env.ASSET_ACCESS_KEY
-    ? {
-        accessKeyId: process.env.ASSET_ACCESS_KEY,
-        secretAccessKey: process.env.ASSET_SECRET_KEY ?? ''
-      }
-    : undefined
-});
 
 // Allowed file types
 const ALLOWED_TYPES = {
@@ -44,32 +28,35 @@ interface UploadResult {
   error?: string;
 }
 
-async function uploadToS3(buffer: Buffer, key: string, contentType: string): Promise<string> {
-  if (!bucket) {
-    throw new Error('Storage not configured (ASSET_BUCKET missing)');
+function resolveBrandingPublicDir(): string {
+  const configured = process.env.BRANDING_PUBLIC_DIR;
+  if (configured && configured.trim()) {
+    return path.resolve(configured);
   }
 
-  const command = new PutObjectCommand({
-    Bucket: bucket,
-    Key: key,
-    Body: buffer,
-    ContentType: contentType,
-    ACL: 'public-read',
-  });
-
-  await s3.send(command);
-
-  if (publicUrl) {
-    return `${publicUrl}/${key}`;
-  } else if (endpoint) {
-     return `${endpoint}/${bucket}/${key}`;
-  } else {
-     return `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+  // In production with Next.js standalone we copy public -> .next/standalone/public
+  const standalonePublic = path.join(process.cwd(), '.next', 'standalone', 'public');
+  if (fs.existsSync(standalonePublic)) {
+    return standalonePublic;
   }
+
+  // Local dev / non-standalone
+  return path.join(process.cwd(), 'public');
+}
+
+async function writePublicFile(buffer: Buffer, relativePath: string): Promise<string> {
+  const publicDir = resolveBrandingPublicDir();
+  const safeRelative = relativePath.replace(/^\/+/, '');
+  const absPath = path.join(publicDir, safeRelative);
+
+  await fs.promises.mkdir(path.dirname(absPath), { recursive: true });
+  await fs.promises.writeFile(absPath, buffer);
+
+  return `/${safeRelative}`;
 }
 
 async function processLogo(buffer: Buffer): Promise<string> {
-  const filename = `branding/logo-${Date.now()}.png`;
+  const filename = `uploads/branding/logo-${Date.now()}.png`;
   
   // Resize and convert to PNG
   const processedBuffer = await sharp(buffer)
@@ -77,7 +64,7 @@ async function processLogo(buffer: Buffer): Promise<string> {
     .png()
     .toBuffer();
 
-  return uploadToS3(processedBuffer, filename, 'image/png');
+  return writePublicFile(processedBuffer, filename);
 }
 
 async function processFavicon(buffer: Buffer): Promise<Record<string, string>> {
@@ -86,7 +73,7 @@ async function processFavicon(buffer: Buffer): Promise<Record<string, string>> {
   
   // Generate multiple sizes
   for (const size of [16, 32, 48, 180, 192, 512]) {
-    const filename = `branding/favicon-${size}x${size}-${timestamp}.png`;
+    const filename = `uploads/branding/favicon-${size}x${size}-${timestamp}.png`;
     
     const processedBuffer = await sharp(buffer)
       .resize(size, size, {
@@ -95,24 +82,18 @@ async function processFavicon(buffer: Buffer): Promise<Record<string, string>> {
       })
       .png()
       .toBuffer();
-    
-    urls[`icon-${size}`] = await uploadToS3(processedBuffer, filename, 'image/png');
+
+    urls[`icon-${size}`] = await writePublicFile(processedBuffer, filename);
   }
-  
-  // Generate ICO for main favicon (32x32)
-  const icoFilename = `branding/favicon-${timestamp}.ico`;
-  const icoBuffer = await sharp(buffer)
-    .resize(32, 32, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
-    .png()
-    .toBuffer();
-    
-  urls['favicon'] = await uploadToS3(icoBuffer, icoFilename, 'image/x-icon');
+
+  // Provide a stable "main" favicon URL that includes "-32x32" so layout replacements work.
+  urls['favicon'] = urls['icon-32'];
   
   return urls;
 }
 
 async function processOgImage(buffer: Buffer): Promise<string> {
-  const filename = `branding/og-image-${Date.now()}.jpg`;
+  const filename = `uploads/branding/og-image-${Date.now()}.jpg`;
   
   const processedBuffer = await sharp(buffer)
     .resize(1200, 630, {
@@ -120,8 +101,8 @@ async function processOgImage(buffer: Buffer): Promise<string> {
     })
     .jpeg({ quality: 85 })
     .toBuffer();
-  
-  return uploadToS3(processedBuffer, filename, 'image/jpeg');
+
+  return writePublicFile(processedBuffer, filename);
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse<UploadResult>> {

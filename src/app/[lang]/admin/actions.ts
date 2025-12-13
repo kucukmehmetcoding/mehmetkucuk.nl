@@ -796,7 +796,9 @@ export async function toggleRssFeedStatus(feedId: string) {
 
 export async function getBotSettings() {
   try {
-    let settings = await prisma.botSettings.findFirst();
+    let settings = await prisma.botSettings.findFirst({
+      orderBy: { updatedAt: 'desc' },
+    });
     
     // Create default settings if not exists
     if (!settings) {
@@ -837,7 +839,9 @@ export async function updateBotSettings(data: {
   enablePaywallFilter?: boolean;
 }) {
   try {
-    const existing = await prisma.botSettings.findFirst();
+    const existing = await prisma.botSettings.findFirst({
+      orderBy: { updatedAt: 'desc' },
+    });
     
     if (existing) {
       await prisma.botSettings.update({

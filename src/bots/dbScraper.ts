@@ -72,7 +72,9 @@ export interface ScrapedItem {
  * Get bot settings from database
  */
 async function getBotSettings() {
-  let settings = await prisma.botSettings.findFirst();
+  let settings = await prisma.botSettings.findFirst({
+    orderBy: { updatedAt: 'desc' },
+  });
   if (!settings) {
     settings = await prisma.botSettings.create({
       data: {
