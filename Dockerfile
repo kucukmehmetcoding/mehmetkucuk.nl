@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.6
 
-ARG NODE_VERSION=20.18.0
+ARG NODE_VERSION=22.12.0
 FROM node:${NODE_VERSION}-alpine AS base
 ENV PNPM_HOME=/pnpm
 ENV PATH="$PNPM_HOME:$PATH"
@@ -14,6 +14,16 @@ COPY prisma ./prisma
 RUN if [ -f pnpm-lock.yaml ]; then corepack pnpm install --frozen-lockfile; \
     elif [ -f package-lock.json ]; then npm ci; \
     else npm install; fi
+
+# Migrator stage (runs prisma migrate + seed with full dependencies)
+FROM base AS migrator
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=deps /app/node_modules ./node_modules
+COPY package.json package-lock.json* pnpm-lock.yaml* ./
+COPY prisma ./prisma
+COPY tsconfig.json ./tsconfig.json
+CMD ["sh", "-c", "npx prisma migrate deploy && npx prisma db seed"]
 
 # Builder stage
 FROM base AS builder
@@ -42,8 +52,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Copy public assets
-COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 # Create .next directory with correct permissions
 RUN mkdir .next && chown nextjs:nodejs .next
@@ -59,6 +68,9 @@ COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
 # Switch to non-root user
 USER nextjs
+
+# Ensure local uploads path exists (will be bind-mounted in production)
+RUN mkdir -p /app/public/uploads && true
 
 EXPOSE 3000
 
