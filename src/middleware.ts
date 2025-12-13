@@ -90,12 +90,14 @@ export function middleware(request: NextRequest) {
   const ip = getClientIp(request);
   const userAgent = request.headers.get('user-agent');
 
-  // Skip static files and internal Next.js requests
+  // Skip static files, internal Next.js requests, and health check endpoints
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/static') ||
     pathname.includes('.') ||
-    pathname.startsWith('/api/cron')
+    pathname.startsWith('/api/cron') ||
+    pathname.startsWith('/api/ready') ||
+    pathname.startsWith('/api/health')
   ) {
     return NextResponse.next();
   }
