@@ -8,17 +8,11 @@ cmds = ["npm ci"]
 cacheDirectories = []
 
 [phases.build]
-cmds = [
-  "npx prisma generate",
-  "npm run build",
-  "mkdir -p .next/standalone/.next",
-  "cp -r public .next/standalone/public",
-  "cp -r .next/static .next/standalone/.next/static"
-]
+cmds = ["npm run build"]
 cacheDirectories = []
 
 [start]
-cmd = "npx prisma migrate deploy && npx prisma db seed && HOSTNAME=0.0.0.0 node .next/standalone/server.js"
+cmd = "npx prisma migrate deploy && npx prisma db seed && PORT=3000 HOSTNAME=0.0.0.0 node .next/standalone/server.js"
 
 [variables]
 NODE_ENV = "production"
