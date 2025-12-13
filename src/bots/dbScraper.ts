@@ -383,7 +383,7 @@ export async function scrapeByPriority(priority: FeedPriority): Promise<{
         data: {
           errorCount: { increment: 1 },
           lastError: String(error),
-          status: feed.errorCount >= 4 ? FeedStatus.error : undefined,
+          status: feed.errorCount >= 3 ? FeedStatus.error : undefined,
         },
       });
     }

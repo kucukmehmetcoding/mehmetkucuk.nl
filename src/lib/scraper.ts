@@ -6,6 +6,71 @@ import {cleanHtml} from './htmlCleaner';
 
 const parser = new Parser({timeout: 10000});
 
+const DEFAULT_RSS_UA =
+  process.env.RSS_FETCH_USER_AGENT ||
+  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+
+async function fetchWithTimeout(
+  url: string,
+  {
+    timeoutMs,
+    headers,
+  }: {
+    timeoutMs: number;
+    headers: Record<string, string>;
+  }
+) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, {
+      redirect: 'follow',
+      headers,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(id);
+  }
+}
+
+async function fetchRssXml(feedUrl: string): Promise<string> {
+  const baseHeaders = {
+    'user-agent': DEFAULT_RSS_UA,
+    accept: 'application/rss+xml, application/atom+xml, application/xml;q=0.9, text/xml;q=0.8, */*;q=0.7',
+    'accept-language': 'en-US,en;q=0.9,tr;q=0.8,nl;q=0.7',
+    'cache-control': 'no-cache',
+    pragma: 'no-cache',
+  };
+
+  const res = await fetchWithTimeout(feedUrl, {timeoutMs: 15000, headers: baseHeaders});
+  if (!res.ok) {
+    // Some providers block unknown UAs. Retry once with a more explicit bot UA.
+    if (res.status === 403 || res.status === 429) {
+      const retry = await fetchWithTimeout(feedUrl, {
+        timeoutMs: 15000,
+        headers: {
+          ...baseHeaders,
+          'user-agent': 'MKNewsBot/1.0 (+https://mehmetkucuk.nl)',
+        },
+      });
+      if (!retry.ok) {
+        throw new Error(`HTTP ${retry.status} fetching RSS`);
+      }
+      return await retry.text();
+    }
+    throw new Error(`HTTP ${res.status} fetching RSS`);
+  }
+
+  const contentType = res.headers.get('content-type') || '';
+  // Many feeds return text/plain; don't over-reject.
+  if (contentType && !/(xml|rss|atom|text\/plain)/i.test(contentType)) {
+    // Still read body so errors show useful details.
+    const body = await res.text();
+    throw new Error(`Unexpected content-type: ${contentType}. Body starts: ${body.slice(0, 120)}`);
+  }
+  return await res.text();
+}
+
 export type RawNewsItem = {
   title: string;
   url: string;
@@ -29,7 +94,8 @@ async function summarize(title: string, content: string) {
 }
 
 export async function fetchRssItems(feedUrl: string): Promise<RawNewsItem[]> {
-  const feed = await parser.parseURL(feedUrl);
+  const xml = await fetchRssXml(feedUrl);
+  const feed = await parser.parseString(xml);
   const items: RawNewsItem[] = [];
   for (const entry of feed.items) {
     if (!entry.link || !entry.title) continue;

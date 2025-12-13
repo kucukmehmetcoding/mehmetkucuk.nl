@@ -3,7 +3,7 @@
 import {prisma} from '@/lib/prisma';
 import {revalidatePath} from 'next/cache';
 import {redirect} from 'next/navigation';
-import {getCategoryIdFromName, getCategoryName} from '@/lib/categories';
+import {CATEGORIES, getCategoryIdFromName, getCategoryName} from '@/lib/categories';
 import {toNewsSlug} from '@/lib/slugify';
 
 // Article Actions
@@ -940,8 +940,50 @@ export async function getBotStats() {
 // Initialize Default RSS Feeds
 // ==========================================
 
+async function ensureDefaultCategoriesExist() {
+  for (const [slug, names] of Object.entries(CATEGORIES)) {
+    const category = await prisma.category.upsert({
+      where: {slug},
+      create: {slug},
+      update: {},
+    });
+
+    await prisma.categoryTranslation.upsert({
+      where: {categoryId_lang: {categoryId: category.id, lang: 'tr' as any}},
+      create: {categoryId: category.id, lang: 'tr' as any, name: names.tr},
+      update: {name: names.tr},
+    });
+    await prisma.categoryTranslation.upsert({
+      where: {categoryId_lang: {categoryId: category.id, lang: 'en' as any}},
+      create: {categoryId: category.id, lang: 'en' as any, name: names.en},
+      update: {name: names.en},
+    });
+    await prisma.categoryTranslation.upsert({
+      where: {categoryId_lang: {categoryId: category.id, lang: 'nl' as any}},
+      create: {categoryId: category.id, lang: 'nl' as any, name: names.nl},
+      update: {name: names.nl},
+    });
+  }
+}
+
 export async function initializeDefaultRssFeeds() {
   try {
+    await ensureDefaultCategoriesExist();
+
+    // Repair known-bad URLs from older defaults
+    const urlFixes: Array<{from: string; to: string}> = [
+      {from: 'https://news.ycombinator.com/rss', to: 'https://hnrss.org/frontpage'},
+    ];
+    for (const fix of urlFixes) {
+      const existing = await prisma.rssFeed.findUnique({where: {url: fix.from}});
+      if (existing) {
+        const targetExists = await prisma.rssFeed.findUnique({where: {url: fix.to}});
+        if (!targetExists) {
+          await prisma.rssFeed.update({where: {id: existing.id}, data: {url: fix.to}});
+        }
+      }
+    }
+
     const defaultFeeds = [
       // Technology - High Priority
       {name: 'The Verge', url: 'https://www.theverge.com/rss/index.xml', category: 'technology', priority: 'high', language: 'en'},
@@ -959,7 +1001,7 @@ export async function initializeDefaultRssFeeds() {
       {name: 'Bitcoin Magazine', url: 'https://bitcoinmagazine.com/feed', category: 'crypto', priority: 'medium', language: 'en'},
       
       // Programming & Development
-      {name: 'Hacker News', url: 'https://news.ycombinator.com/rss', category: 'programming', priority: 'high', language: 'en'},
+      {name: 'Hacker News', url: 'https://hnrss.org/frontpage', category: 'programming', priority: 'high', language: 'en'},
       {name: 'Dev.to', url: 'https://dev.to/feed', category: 'programming', priority: 'medium', language: 'en'},
       {name: 'GitHub Blog', url: 'https://github.blog/feed/', category: 'programming', priority: 'medium', language: 'en'},
       

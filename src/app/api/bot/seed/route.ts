@@ -1,6 +1,33 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { FeedPriority } from '@prisma/client';
+import { CATEGORIES } from '@/lib/categories';
+
+async function ensureDefaultCategoriesExist() {
+  for (const [slug, names] of Object.entries(CATEGORIES)) {
+    const category = await prisma.category.upsert({
+      where: { slug },
+      create: { slug },
+      update: {},
+    });
+
+    await prisma.categoryTranslation.upsert({
+      where: { categoryId_lang: { categoryId: category.id, lang: 'tr' as any } },
+      create: { categoryId: category.id, lang: 'tr' as any, name: names.tr },
+      update: { name: names.tr },
+    });
+    await prisma.categoryTranslation.upsert({
+      where: { categoryId_lang: { categoryId: category.id, lang: 'en' as any } },
+      create: { categoryId: category.id, lang: 'en' as any, name: names.en },
+      update: { name: names.en },
+    });
+    await prisma.categoryTranslation.upsert({
+      where: { categoryId_lang: { categoryId: category.id, lang: 'nl' as any } },
+      create: { categoryId: category.id, lang: 'nl' as any, name: names.nl },
+      update: { name: names.nl },
+    });
+  }
+}
 
 // Default RSS feeds for various categories
 const defaultFeeds = [
@@ -60,6 +87,8 @@ const defaultFeeds = [
 // POST /api/bot/seed - Seed default RSS feeds
 export async function POST() {
   try {
+    await ensureDefaultCategoriesExist();
+
     const results = {
       created: 0,
       skipped: 0,
