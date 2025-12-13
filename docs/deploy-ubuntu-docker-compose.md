@@ -13,7 +13,7 @@ This setup runs:
 1. SSH into the VPS.
 2. Clone the repo and `cd` into it.
 3. Create `.env`:
-   - Copy `.env.production.example` to `.env`
+   - Copy `env.production.example` to `.env`
    - Fill in at least `ADMIN_JWT_SECRET`, `POSTGRES_PASSWORD`, `ADMIN_PASSWORD`
 4. Run:
    - `bash deploy.sh`

@@ -3,13 +3,13 @@ set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_FILE="${REPO_DIR}/.env"
-EXAMPLE_ENV_FILE="${REPO_DIR}/.env.production.example"
+EXAMPLE_ENV_FILE="${REPO_DIR}/env.production.example"
 COMPOSE_FILE="${REPO_DIR}/docker-compose.prod.yml"
 
 echo "[deploy] Using repo: ${REPO_DIR}"
 
 if [[ ! -f "${ENV_FILE}" ]]; then
-  echo "[deploy] Creating .env from .env.production.example"
+  echo "[deploy] Creating .env from env.production.example"
   cp "${EXAMPLE_ENV_FILE}" "${ENV_FILE}"
   echo "[deploy] Edit ${ENV_FILE} and re-run deploy.sh"
   exit 1
