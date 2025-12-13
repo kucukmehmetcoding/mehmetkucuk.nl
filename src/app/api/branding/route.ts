@@ -6,8 +6,8 @@ export const runtime = 'nodejs';
 // Force dynamic rendering - database required at runtime
 export const dynamic = 'force-dynamic';
 
-// Cache for 5 minutes
-export const revalidate = 300;
+// Always reflect latest DB settings
+export const revalidate = 0;
 
 export async function GET() {
   try {
@@ -30,7 +30,7 @@ export async function GET() {
       siteName: result.siteName || 'MK News',
     }, {
       headers: {
-        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
       },
     });
   } catch (error) {

@@ -90,6 +90,14 @@ export function middleware(request: NextRequest) {
   const ip = getClientIp(request);
   const userAgent = request.headers.get('user-agent');
 
+  // Paths that are safe/expected to be called by non-browser clients (curl/wget, internal probes)
+  const allowNonBrowserClients =
+    pathname.startsWith('/api/ready') ||
+    pathname.startsWith('/api/health') ||
+    pathname.startsWith('/api/bot/') ||
+    pathname.startsWith('/api/branding') ||
+    pathname.startsWith('/api/favicon/');
+
   // Skip static files, internal Next.js requests, and health check endpoints
   if (
     pathname.startsWith('/_next') ||
@@ -108,7 +116,7 @@ export function middleware(request: NextRequest) {
   }
 
   // Block bad bots on other paths
-  if (isBot(userAgent)) {
+  if (!allowNonBrowserClients && isBot(userAgent)) {
     return new NextResponse('Forbidden', {status: 403});
   }
 

@@ -34,7 +34,7 @@ export default function LocaleLayout({
 
   // Fetch branding data (logo, site name)
   useEffect(() => {
-    fetch('/api/branding')
+    fetch('/api/branding', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (data.success) {

@@ -22,6 +22,11 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://mehmetkucuk.nl';
 const siteTitle = 'MK News Intelligence';
 const siteDescription = 'Multilingual, AI-assisted developer newswire for tech professionals. Turkish, English, Dutch coverage.';
 
+// Branding (logo/favicon/OG) and analytics are stored in DB and can change at runtime.
+// Force dynamic rendering so updates appear without rebuilding.
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
