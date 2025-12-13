@@ -126,7 +126,14 @@ async function getAnalyticsSettings() {
     const settings = await prisma.siteSetting.findMany({
       where: {
         key: {
-          in: ['googleAnalyticsId', 'googleTagManager', 'googleAdsenseId', 'facebookPixel', 'yandexMetrica'],
+          in: [
+            'googleAnalyticsId',
+            'googleTagManager',
+            'googleAdsenseId',
+            'googleSearchConsole',
+            'facebookPixel',
+            'yandexMetrica',
+          ],
         },
       },
     });
@@ -134,6 +141,15 @@ async function getAnalyticsSettings() {
   } catch {
     return {};
   }
+}
+
+function extractGoogleVerificationContent(value?: string) {
+  const v = (value || '').trim();
+  if (!v) return '';
+
+  // Allow users to paste either the raw content token or the full <meta ...> tag.
+  const match = v.match(/content\s*=\s*"([^"]+)"|content\s*=\s*'([^']+)'/i);
+  return (match?.[1] || match?.[2] || v).trim();
 }
 
 // Fetch branding settings from database
@@ -159,6 +175,7 @@ export default async function RootLayout({children}: {children: ReactNode}) {
   // Dynamic favicon URLs from settings or defaults
   const faviconMain = brandingSettings.siteFaviconMain || '/favicon.ico';
   const ogImage = brandingSettings.ogImage || `${siteUrl}/og-image.jpg`;
+  const googleVerification = extractGoogleVerificationContent(analyticsSettings.googleSearchConsole);
 
   return (
     <html lang="tr" suppressHydrationWarning className={`${inter.variable} ${spaceGrotesk.variable}`}>
@@ -180,6 +197,11 @@ export default async function RootLayout({children}: {children: ReactNode}) {
         
         {/* Dynamic OG Image */}
         <meta property="og:image" content={ogImage} />
+
+        {/* Google Search Console Verification */}
+        {googleVerification ? (
+          <meta name="google-site-verification" content={googleVerification} />
+        ) : null}
         
         {/* WebSite Schema for Google Sitelinks Search Box */}
         <script

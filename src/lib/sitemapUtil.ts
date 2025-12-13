@@ -5,15 +5,25 @@ import {SUPPORTED_LANGS} from './i18n';
 export async function getSitemapEntries(baseUrl: string): Promise<MetadataRoute.Sitemap> {
   const siteUrl = baseUrl.replace(/\/+$/, '');
 
-  const articles = await prisma.article.findMany({
-    where: {published: true},
-    select: {
-      updatedAt: true,
-      translations: {select: {lang: true, slug: true}},
-    },
-    orderBy: {updatedAt: 'desc'},
-    take: 1000
-  });
+  let articles: Array<{updatedAt: Date; translations: Array<{lang: string; slug: string}>}> = [];
+  try {
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL is not set');
+    }
+    articles = await prisma.article.findMany({
+      where: {published: true},
+      select: {
+        updatedAt: true,
+        translations: {select: {lang: true, slug: true}},
+      },
+      orderBy: {updatedAt: 'desc'},
+      take: 1000,
+    });
+  } catch {
+    // During container image builds (or if DB is temporarily unavailable), we still
+    // want to generate a valid sitemap for evergreen pages without failing the build.
+    articles = [];
+  }
 
   const entries: MetadataRoute.Sitemap = [];
   for (const article of articles) {
