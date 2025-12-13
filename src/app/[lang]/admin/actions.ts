@@ -5,6 +5,7 @@ import {revalidatePath} from 'next/cache';
 import {redirect} from 'next/navigation';
 import {CATEGORIES, getCategoryIdFromName, getCategoryName} from '@/lib/categories';
 import {toNewsSlug} from '@/lib/slugify';
+import {ensureCategoryExists, normalizeCategorySlug, syncCategoriesFromContent} from '@/lib/categorySync';
 
 // Article Actions
 export async function createArticle(
@@ -19,6 +20,7 @@ export async function createArticle(
   }
 ) {
   try {
+    const normalizedCategory = await ensureCategoryExists(data.category);
     // Generate SEO-friendly slug with Turkish character support
     const articleSlug = toNewsSlug(data.title);
     // Generate translation-specific slug for current language
@@ -27,7 +29,7 @@ export async function createArticle(
     const article = await prisma.article.create({
       data: {
         slug: articleSlug,
-        category: data.category,
+        category: normalizedCategory,
         published: data.published,
         publishedAt: data.published ? new Date() : null,
       },
@@ -65,13 +67,14 @@ export async function updateArticle(
   }
 ) {
   try {
+    const normalizedCategory = await ensureCategoryExists(data.category);
     // Generate translation-specific slug for current language
     const translationSlug = toNewsSlug(data.title, lang);
     
     await prisma.article.update({
       where: {id: articleId},
       data: {
-        category: data.category,
+        category: normalizedCategory,
         published: data.published,
         publishedAt: data.published ? new Date() : null,
         translations: {
@@ -231,6 +234,9 @@ export async function deleteCategory(categoryId: string) {
 
 export async function getCategories() {
   try {
+    await ensureDefaultCategoriesExist();
+    await syncCategoriesFromContent();
+
     const categories = await prisma.category.findMany({
       include: {
         translations: true,
@@ -706,11 +712,12 @@ export async function createRssFeed(data: {
   maxItemsPerFetch?: number;
 }) {
   try {
+    const normalizedCategory = await ensureCategoryExists(data.category);
     const feed = await prisma.rssFeed.create({
       data: {
         name: data.name,
         url: data.url,
-        category: data.category,
+        category: normalizedCategory,
         priority: data.priority as any,
         language: data.language,
         maxItemsPerFetch: data.maxItemsPerFetch ?? 10,
@@ -739,10 +746,16 @@ export async function updateRssFeed(
   }
 ) {
   try {
+    const normalizedCategory = data.category ? normalizeCategorySlug(data.category) : undefined;
+    if (normalizedCategory) {
+      await ensureCategoryExists(normalizedCategory);
+    }
+
     await prisma.rssFeed.update({
       where: {id: feedId},
       data: {
         ...data,
+        ...(normalizedCategory ? {category: normalizedCategory} : {}),
         priority: data.priority as any,
         status: data.status as any,
       },

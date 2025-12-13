@@ -96,7 +96,8 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/api/health') ||
     pathname.startsWith('/api/bot/') ||
     pathname.startsWith('/api/branding') ||
-    pathname.startsWith('/api/favicon/');
+    pathname.startsWith('/api/favicon/') ||
+    pathname.startsWith('/api/og-image');
 
   // Skip static files, internal Next.js requests, and health check endpoints
   if (

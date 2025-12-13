@@ -28,7 +28,7 @@ export async function generateMetadata({params}: {params: {lang: string; slug: s
   if (!article || !translation) {
     return {};
   }
-  return buildArticleMetadata(params.slug, translation);
+  return buildArticleMetadata(translation.slug, translation, article.imageUrl || undefined);
 }
 
 export default async function ArticlePage({params}: {params: {lang: string; slug: string}}) {
@@ -41,6 +41,10 @@ export default async function ArticlePage({params}: {params: {lang: string; slug
     notFound();
   }
 
+  // Canonical URL uses the translation slug under /post.
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mehmetkucuk.nl';
+  const canonicalUrl = `${siteUrl}/${params.lang}/post/${translation.slug}`;
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
@@ -52,11 +56,11 @@ export default async function ArticlePage({params}: {params: {lang: string; slug
       name: translation.author
     },
     image: article.imageUrl,
-    mainEntityOfPage: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://mehmetkucuk.nl'}/${translation.lang}/news/${article.slug}`
+    mainEntityOfPage: canonicalUrl
   };
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mehmetkucuk.nl';
-  const articleUrl = `${siteUrl}/${params.lang}/news/${article.slug}`;
+  // Use canonical URL for social sharing.
+  const articleUrl = canonicalUrl;
   const categoryName = getCategoryName(article.category, params.lang as Language);
 
   const formatDate = (date: Date) => {

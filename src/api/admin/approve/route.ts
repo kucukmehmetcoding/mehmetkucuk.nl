@@ -1,5 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {prisma} from '@/lib/prisma';
+import {ensureCategoryExists} from '@/lib/categorySync';
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -18,9 +19,11 @@ export async function POST(request: NextRequest) {
     }
   });
 
+  const normalizedCategory = await ensureCategoryExists(queue.translation.article.category);
+
   await prisma.article.update({
     where: {id: queue.translation.articleId},
-    data: {published: true, publishedAt: new Date()}
+    data: {published: true, publishedAt: new Date(), category: normalizedCategory}
   });
 
   return NextResponse.json({status: 'approved'});

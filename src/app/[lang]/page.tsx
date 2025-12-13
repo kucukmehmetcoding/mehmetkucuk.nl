@@ -58,7 +58,7 @@ export async function generateMetadata({params}: {params: {lang: string}}): Prom
       description: descriptions[lang],
       siteName: 'MK News Intelligence',
       images: [{
-        url: `${SITE_URL}/og-image.jpg`,
+        url: `${SITE_URL}/api/og-image`,
         width: 1200,
         height: 630,
         alt: 'MK News Intelligence',

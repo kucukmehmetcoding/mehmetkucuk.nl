@@ -5,6 +5,13 @@ import {SUPPORTED_LANGS} from './i18n';
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://mehmetkucuk.nl';
 const SITE_NAME = 'MK News Intelligence';
 
+function toAbsoluteUrl(url: string): string {
+  const v = (url || '').trim();
+  if (!v) return '';
+  if (v.startsWith('http://') || v.startsWith('https://')) return v;
+  return `${siteUrl}${v.startsWith('/') ? v : `/${v}`}`;
+}
+
 export interface ArticleMetadata {
   slug: string;
   title: string;
@@ -37,6 +44,8 @@ export function buildArticleMetadata(
   alternateLanguages?: Record<string, string>
 ): Metadata {
   const url = `${siteUrl}/${translation.lang}/post/${slug}`;
+  const fallbackImage = `${siteUrl}/api/og-image`;
+  const resolvedImage = imageUrl ? toAbsoluteUrl(imageUrl) : '';
   
   // Build alternates - if we have per-language slugs, use them; otherwise fall back to same slug
   const alternates = SUPPORTED_LANGS.reduce<Record<string, string>>((acc, lang) => {
@@ -71,14 +80,14 @@ export function buildArticleMetadata(
       description: metaDescription,
       locale: translation.lang,
       siteName: SITE_NAME,
-      images: imageUrl ? [
+      images: [
         {
-          url: imageUrl,
+          url: resolvedImage || fallbackImage,
           width: 1200,
           height: 630,
           alt: seoTitle,
-        }
-      ] : [],
+        },
+      ],
       publishedTime: translation.publishedAt?.toISOString(),
       modifiedTime: translation.updatedAt?.toISOString(),
       authors: [translation.author],
@@ -87,7 +96,7 @@ export function buildArticleMetadata(
       card: 'summary_large_image',
       title: seoTitle,
       description: metaDescription,
-      images: imageUrl ? [imageUrl] : [],
+      images: [resolvedImage || fallbackImage],
       creator: '@mehmetkucuk',
     }
   };
@@ -98,11 +107,12 @@ export function buildArticleMetadata(
  * SEO Rule: Include headline, image, datePublished, dateModified, author, publisher
  */
 export function generateNewsArticleSchema(slug: string, translation: Translation, category?: string, imageUrl?: string) {
-  const url = translation.canonicalUrl || `${siteUrl}/${translation.lang}/news/${slug}`;
+  const url = translation.canonicalUrl || `${siteUrl}/${translation.lang}/post/${slug}`;
 
   return {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
+    inLanguage: translation.lang,
     headline: translation.seoTitle || translation.title,
     description: translation.metaDescription || translation.summary,
     image: imageUrl ? [imageUrl] : [],
@@ -117,7 +127,8 @@ export function generateNewsArticleSchema(slug: string, translation: Translation
       name: SITE_NAME,
       logo: {
         '@type': 'ImageObject',
-        url: `${siteUrl}/logo.png`,
+        // Guaranteed to exist (generated icon route) and avoids relying on a static public file.
+        url: `${siteUrl}/icon`,
         width: 250,
         height: 250,
       },

@@ -3,6 +3,57 @@ import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
+const DEFAULT_CATEGORIES: Record<string, {tr: string; en: string; nl: string}> = {
+  technology: {tr: 'Teknoloji', en: 'Technology', nl: 'Technologie'},
+  ai: {tr: 'Yapay Zeka', en: 'Artificial Intelligence', nl: 'Kunstmatige Intelligentie'},
+  crypto: {tr: 'Kripto Para', en: 'Cryptocurrency', nl: 'Cryptocurrency'},
+  programming: {tr: 'Programlama', en: 'Programming', nl: 'Programmeren'},
+  security: {tr: 'Siber Güvenlik', en: 'Cybersecurity', nl: 'Cyberbeveiliging'},
+  science: {tr: 'Bilim', en: 'Science', nl: 'Wetenschap'},
+  gaming: {tr: 'Oyun', en: 'Gaming', nl: 'Gaming'},
+  gadgets: {tr: 'Cihazlar', en: 'Gadgets', nl: 'Gadgets'},
+  business: {tr: 'İş Dünyası', en: 'Business', nl: 'Zakelijk'},
+  space: {tr: 'Uzay', en: 'Space', nl: 'Ruimtevaart'},
+  software: {tr: 'Yazılım', en: 'Software', nl: 'Software'},
+  web: {tr: 'Web Geliştirme', en: 'Web Development', nl: 'Webontwikkeling'},
+  mobile: {tr: 'Mobil', en: 'Mobile', nl: 'Mobiel'},
+  devops: {tr: 'DevOps', en: 'DevOps', nl: 'DevOps'},
+  database: {tr: 'Veritabanı', en: 'Database', nl: 'Database'},
+  cloud: {tr: 'Bulut Bilişim', en: 'Cloud Computing', nl: 'Cloud Computing'},
+  startup: {tr: 'Girişimcilik', en: 'Startups', nl: 'Startups'},
+  other: {tr: 'Diğer', en: 'Other', nl: 'Overig'},
+};
+
+async function seedCategories() {
+  const entries = Object.entries(DEFAULT_CATEGORIES);
+
+  for (const [slug, names] of entries) {
+    const category = await prisma.category.upsert({
+      where: {slug},
+      create: {slug},
+      update: {},
+    });
+
+    await prisma.categoryTranslation.upsert({
+      where: {categoryId_lang: {categoryId: category.id, lang: Language.tr}},
+      create: {categoryId: category.id, lang: Language.tr, name: names.tr},
+      update: {name: names.tr},
+    });
+    await prisma.categoryTranslation.upsert({
+      where: {categoryId_lang: {categoryId: category.id, lang: Language.en}},
+      create: {categoryId: category.id, lang: Language.en, name: names.en},
+      update: {name: names.en},
+    });
+    await prisma.categoryTranslation.upsert({
+      where: {categoryId_lang: {categoryId: category.id, lang: Language.nl}},
+      create: {categoryId: category.id, lang: Language.nl, name: names.nl},
+      update: {name: names.nl},
+    });
+  }
+
+  console.log('🏷️ Categories seeded:', entries.length);
+}
+
 async function ensureAdmin() {
   const adminEmail = process.env.ADMIN_EMAIL || 'admin@mehmetkucuk.nl';
   const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
@@ -131,6 +182,7 @@ async function main() {
   const creds = await ensureAdmin();
   await seedBotSettings();
   await seedSiteSettings();
+  await seedCategories();
   await seedArticle();
   console.log('📧 Default admin email:', creds.adminEmail);
   console.log('🔑 Default admin password:', creds.adminPassword);

@@ -6,6 +6,7 @@ import {translateAll} from '@/lib/translate';
 import {fetchHtmlFallback, fetchRssItems} from '@/lib/scraper';
 import {toNewsSlug} from '@/lib/slugify';
 import {enqueueApproval} from '@/lib/db';
+import {ensureCategoryExists} from '@/lib/categorySync';
 import Joi from 'joi';
 
 export const runtime = 'nodejs';
@@ -60,11 +61,13 @@ export async function persistArticle(input: {
   source?: {originalSource: string; url: string; fingerprint: string; language: string; wordCount: number};
   publishNow: boolean;
 }): Promise<CreateNewsResponse> {
+  const normalizedCategory = await ensureCategoryExists(input.category);
+
   const result = await prisma.$transaction(async (tx) => {
     const article = await tx.article.create({
       data: {
         slug: input.slug,
-        category: input.category,
+        category: normalizedCategory,
         tags: input.tags,
         imageUrl: input.imageUrl,
         published: input.publishNow,
