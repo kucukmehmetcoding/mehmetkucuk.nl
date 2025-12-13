@@ -1,10 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
-import path from 'path';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import sharp from 'sharp';
 
 export const runtime = 'nodejs';
+
+const bucket = process.env.ASSET_BUCKET ?? '';
+const region = process.env.ASSET_REGION ?? 'auto';
+const endpoint = process.env.ASSET_ENDPOINT;
+const publicUrl = process.env.ASSET_PUBLIC_URL;
+
+const s3 = new S3Client({
+  region,
+  endpoint,
+  forcePathStyle: true,
+  credentials: process.env.ASSET_ACCESS_KEY
+    ? {
+        accessKeyId: process.env.ASSET_ACCESS_KEY,
+        secretAccessKey: process.env.ASSET_SECRET_KEY ?? ''
+      }
+    : undefined
+});
 
 // Allowed file types
 const ALLOWED_TYPES = {
@@ -20,13 +35,6 @@ const MAX_SIZES = {
   ogImage: 5 * 1024 * 1024, // 5MB
 };
 
-// Output dimensions
-const OUTPUT_DIMENSIONS = {
-  logo: { width: 200, height: 60 },
-  favicon: { sizes: [16, 32, 48, 180, 192, 512] },
-  ogImage: { width: 1200, height: 630 },
-};
-
 type UploadType = 'logo' | 'favicon' | 'ogImage';
 
 interface UploadResult {
@@ -36,73 +44,84 @@ interface UploadResult {
   error?: string;
 }
 
-async function ensureUploadDir(): Promise<string> {
-  const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'branding');
-  if (!existsSync(uploadDir)) {
-    await mkdir(uploadDir, { recursive: true });
+async function uploadToS3(buffer: Buffer, key: string, contentType: string): Promise<string> {
+  if (!bucket) {
+    throw new Error('Storage not configured (ASSET_BUCKET missing)');
   }
-  return uploadDir;
+
+  const command = new PutObjectCommand({
+    Bucket: bucket,
+    Key: key,
+    Body: buffer,
+    ContentType: contentType,
+    ACL: 'public-read',
+  });
+
+  await s3.send(command);
+
+  if (publicUrl) {
+    return `${publicUrl}/${key}`;
+  } else if (endpoint) {
+     return `${endpoint}/${bucket}/${key}`;
+  } else {
+     return `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+  }
 }
 
-async function processLogo(buffer: Buffer, uploadDir: string): Promise<string> {
-  const filename = `logo-${Date.now()}.png`;
-  const filepath = path.join(uploadDir, filename);
+async function processLogo(buffer: Buffer): Promise<string> {
+  const filename = `branding/logo-${Date.now()}.png`;
   
-  await sharp(buffer)
-    .resize(OUTPUT_DIMENSIONS.logo.width, OUTPUT_DIMENSIONS.logo.height, {
-      fit: 'contain',
-      background: { r: 0, g: 0, b: 0, alpha: 0 },
-    })
+  // Resize and convert to PNG
+  const processedBuffer = await sharp(buffer)
+    .resize(200, 60, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
     .png()
-    .toFile(filepath);
-  
-  return `/uploads/branding/${filename}`;
+    .toBuffer();
+
+  return uploadToS3(processedBuffer, filename, 'image/png');
 }
 
-async function processFavicon(buffer: Buffer, uploadDir: string): Promise<Record<string, string>> {
+async function processFavicon(buffer: Buffer): Promise<Record<string, string>> {
   const urls: Record<string, string> = {};
   const timestamp = Date.now();
   
   // Generate multiple sizes
-  for (const size of OUTPUT_DIMENSIONS.favicon.sizes) {
-    const filename = `favicon-${size}x${size}-${timestamp}.png`;
-    const filepath = path.join(uploadDir, filename);
+  for (const size of [16, 32, 48, 180, 192, 512]) {
+    const filename = `branding/favicon-${size}x${size}-${timestamp}.png`;
     
-    await sharp(buffer)
+    const processedBuffer = await sharp(buffer)
       .resize(size, size, {
         fit: 'contain',
         background: { r: 0, g: 0, b: 0, alpha: 0 },
       })
       .png()
-      .toFile(filepath);
+      .toBuffer();
     
-    urls[`icon-${size}`] = `/uploads/branding/${filename}`;
+    urls[`icon-${size}`] = await uploadToS3(processedBuffer, filename, 'image/png');
   }
   
   // Generate ICO for main favicon (32x32)
-  const icoFilename = `favicon-${timestamp}.ico`;
-  const icoFilepath = path.join(uploadDir, icoFilename);
-  await sharp(buffer)
+  const icoFilename = `branding/favicon-${timestamp}.ico`;
+  const icoBuffer = await sharp(buffer)
     .resize(32, 32, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
     .png()
-    .toFile(icoFilepath);
-  urls['favicon'] = `/uploads/branding/${icoFilename}`;
+    .toBuffer();
+    
+  urls['favicon'] = await uploadToS3(icoBuffer, icoFilename, 'image/x-icon');
   
   return urls;
 }
 
-async function processOgImage(buffer: Buffer, uploadDir: string): Promise<string> {
-  const filename = `og-image-${Date.now()}.jpg`;
-  const filepath = path.join(uploadDir, filename);
+async function processOgImage(buffer: Buffer): Promise<string> {
+  const filename = `branding/og-image-${Date.now()}.jpg`;
   
-  await sharp(buffer)
-    .resize(OUTPUT_DIMENSIONS.ogImage.width, OUTPUT_DIMENSIONS.ogImage.height, {
+  const processedBuffer = await sharp(buffer)
+    .resize(1200, 630, {
       fit: 'cover',
     })
     .jpeg({ quality: 85 })
-    .toFile(filepath);
+    .toBuffer();
   
-  return `/uploads/branding/${filename}`;
+  return uploadToS3(processedBuffer, filename, 'image/jpeg');
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse<UploadResult>> {
@@ -138,36 +157,34 @@ export async function POST(request: NextRequest): Promise<NextResponse<UploadRes
     }
     
     const buffer = Buffer.from(await file.arrayBuffer());
-    const uploadDir = await ensureUploadDir();
     
     let result: UploadResult;
     
     switch (type) {
       case 'logo': {
-        const url = await processLogo(buffer, uploadDir);
+        const url = await processLogo(buffer);
         result = { success: true, url };
         break;
       }
       case 'favicon': {
-        const urls = await processFavicon(buffer, uploadDir);
+        const urls = await processFavicon(buffer);
         result = { success: true, urls };
         break;
       }
       case 'ogImage': {
-        const url = await processOgImage(buffer, uploadDir);
+        const url = await processOgImage(buffer);
         result = { success: true, url };
         break;
       }
       default:
-        result = { success: false, error: 'Unknown upload type' };
+        throw new Error('Invalid type');
     }
     
     return NextResponse.json(result);
-    
   } catch (error) {
-    console.error('[Upload] Error:', error);
+    console.error('Upload error:', error);
     return NextResponse.json(
-      { success: false, error: 'Upload failed. Please try again.' },
+      { success: false, error: 'Upload failed' },
       { status: 500 }
     );
   }
