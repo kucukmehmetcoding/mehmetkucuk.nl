@@ -4,6 +4,7 @@ Allow: /tr/
 Allow: /en/
 Allow: /nl/
 Allow: /sitemap.xml
+Allow: /sitemap-index.xml
 Allow: /sitemaps/
 
 # Disallow crawling of admin panel
@@ -18,7 +19,7 @@ Disallow: /*?*page=2
 Disallow: /*?*page=3
 
 # Sitemaps
-Sitemap: https://mehmetkucuk.nl/sitemap.xml
+Sitemap: https://mehmetkucuk.nl/sitemap-index.xml
 
 # Crawl delay for respectful crawling
 Crawl-delay: 1

@@ -7,7 +7,7 @@ export async function GET() {
     const alternates = SUPPORTED_LANGS.map(
       (alt) =>
         `<xhtml:link rel="alternate" hreflang="${alt}" href="${baseUrl}/${alt}" />`
-    ).join('');
+    ).join('') + `<xhtml:link rel="alternate" hreflang="x-default" href="${baseUrl}/tr" />`;
     return `
       <url>
         <loc>${baseUrl}/${lang}</loc>
