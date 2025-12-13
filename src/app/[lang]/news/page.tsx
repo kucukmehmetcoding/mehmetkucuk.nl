@@ -10,6 +10,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://mehmetkucuk.nl';
 const ARTICLES_PER_PAGE = 12;
 
 export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({params}: {params: {lang: string}}): Promise<Metadata> {
   if (!isLocale(params.lang)) {
