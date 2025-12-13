@@ -23,7 +23,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY package.json package-lock.json* pnpm-lock.yaml* ./
 COPY prisma ./prisma
 COPY tsconfig.json ./tsconfig.json
-CMD ["sh", "-c", "npx prisma migrate deploy && npx prisma db seed"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node --loader tsx prisma/seed.ts"]
 
 # Builder stage
 FROM base AS builder
