@@ -139,7 +139,7 @@ export async function publishDraftsWithCategory(
               body: value.body,
               seoTitle: value.seo_title,
               metaDescription: value.meta_description,
-              author: 'MK News Bot',
+              author: 'MK News',
             } satisfies TranslationPayload;
           }
           return acc;
