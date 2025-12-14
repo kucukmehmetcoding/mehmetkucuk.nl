@@ -395,6 +395,234 @@ export async function scrapeByPriority(priority: FeedPriority): Promise<{
 }
 
 /**
+ * Scrape feeds by priority and preferred category (for balanced distribution)
+ */
+export async function scrapeByPriorityAndCategory(
+  priority: FeedPriority,
+  preferredCategory: string
+): Promise<{
+  items: ScrapedItem[];
+  stats: {
+    feedsChecked: number;
+    itemsFetched: number;
+    itemsNew: number;
+    itemsDuplicate: number;
+    itemsCrossSourceDuplicate: number;
+    itemsPaywallFiltered: number;
+    errors: string[];
+  };
+}> {
+  const settings = await getBotSettings();
+  
+  if (!settings.isEnabled) {
+    return {
+      items: [],
+      stats: {
+        feedsChecked: 0,
+        itemsFetched: 0,
+        itemsNew: 0,
+        itemsDuplicate: 0,
+        itemsCrossSourceDuplicate: 0,
+        itemsPaywallFiltered: 0,
+        errors: ['Bot is disabled'],
+      },
+    };
+  }
+
+  // Get active feeds for this priority AND category
+  let feeds = await prisma.rssFeed.findMany({
+    where: {
+      priority,
+      status: FeedStatus.active,
+      category: preferredCategory,
+    },
+  });
+
+  // If no feeds for preferred category+priority, try other priorities in same category
+  if (feeds.length === 0) {
+    feeds = await prisma.rssFeed.findMany({
+      where: {
+        status: FeedStatus.active,
+        category: preferredCategory,
+      },
+    });
+  }
+
+  // If still no feeds, fall back to regular priority-based scrape
+  if (feeds.length === 0) {
+    console.log(`[Scraper] No feeds for ${priority} priority in category ${preferredCategory}, falling back to priority-only`);
+    return scrapeByPriority(priority);
+  }
+
+  const items: ScrapedItem[] = [];
+  const stats = {
+    feedsChecked: feeds.length,
+    itemsFetched: 0,
+    itemsNew: 0,
+    itemsDuplicate: 0,
+    itemsCrossSourceDuplicate: 0,
+    itemsPaywallFiltered: 0,
+    errors: [] as string[],
+  };
+
+  for (const feed of feeds) {
+    try {
+      console.log(`[Scraper] Fetching ${feed.name} (${feed.url}) [${preferredCategory}]`);
+      
+      const rssItems = await fetchRssItems(feed.url);
+      stats.itemsFetched += rssItems.length;
+
+      const limitedItems = rssItems.slice(0, feed.maxItemsPerFetch);
+
+      for (const rssItem of limitedItems) {
+        const guid = rssItem.fingerprint || rssItem.url || rssItem.title;
+        
+        if (await isAlreadyFetched(feed.id, guid)) {
+          stats.itemsDuplicate++;
+          continue;
+        }
+
+        if (feed.lastItemDate && rssItem.publishedAt) {
+          const itemDate = new Date(rssItem.publishedAt);
+          if (itemDate <= feed.lastItemDate) {
+            stats.itemsDuplicate++;
+            continue;
+          }
+        }
+
+        const contentHash = computeContentHash(rssItem.title, rssItem.body);
+        const simHash = computeSimHash(rssItem.body);
+
+        const crossCheck = await isCrossSourceDuplicate(
+          simHash,
+          feed.id,
+          rssItem.title,
+          settings.simHashThreshold,
+          settings.crossSourceDedup
+        );
+
+        if (crossCheck.isDuplicate) {
+          console.log(`[Scraper] Cross-source duplicate: "${rssItem.title}"`);
+          stats.itemsCrossSourceDuplicate++;
+          
+          await prisma.fetchedItem.create({
+            data: {
+              feedId: feed.id,
+              guid,
+              title: rssItem.title,
+              link: rssItem.url,
+              pubDate: rssItem.publishedAt ? new Date(rssItem.publishedAt) : null,
+              contentHash,
+              simHash,
+              processed: true,
+              skippedReason: `cross_source_duplicate:${crossCheck.matchedFeed}`,
+            },
+          });
+          continue;
+        }
+
+        const paywallCheck = isPaywallContent(rssItem.title, rssItem.body, settings.enablePaywallFilter ?? true);
+        if (paywallCheck.isPaywall) {
+          console.log(`[Scraper] Paywall filtered: "${rssItem.title}"`);
+          stats.itemsPaywallFiltered = (stats.itemsPaywallFiltered || 0) + 1;
+          
+          await prisma.fetchedItem.create({
+            data: {
+              feedId: feed.id,
+              guid,
+              title: rssItem.title,
+              link: rssItem.url,
+              pubDate: rssItem.publishedAt ? new Date(rssItem.publishedAt) : null,
+              contentHash,
+              simHash,
+              processed: true,
+              skippedReason: `paywall:${paywallCheck.matchedKeyword}`,
+            },
+          });
+          continue;
+        }
+
+        globalSimHashCache.set(guid, {
+          simHash,
+          feedId: feed.id,
+          title: rssItem.title,
+        });
+
+        await prisma.fetchedItem.upsert({
+          where: {
+            feedId_guid: {
+              feedId: feed.id,
+              guid,
+            },
+          },
+          create: {
+            feedId: feed.id,
+            guid,
+            title: rssItem.title,
+            link: rssItem.url,
+            pubDate: rssItem.publishedAt ? new Date(rssItem.publishedAt) : null,
+            contentHash,
+            simHash,
+            body: rssItem.body,
+            summary: rssItem.summary,
+            processed: false,
+          },
+          update: {},
+        });
+
+        items.push({
+          guid,
+          title: rssItem.title,
+          link: rssItem.url,
+          body: rssItem.body,
+          pubDate: rssItem.publishedAt ? new Date(rssItem.publishedAt) : null,
+          contentHash,
+          simHash,
+          feedId: feed.id,
+          feedName: feed.name,
+          category: feed.category,
+          language: feed.language,
+          fingerprint: guid,
+          summary: rssItem.summary,
+        });
+
+        stats.itemsNew++;
+      }
+
+      // Update feed stats
+      await prisma.rssFeed.update({
+        where: { id: feed.id },
+        data: {
+          lastFetchedAt: new Date(),
+          lastItemDate: limitedItems.length > 0 && limitedItems[0].publishedAt ? new Date(limitedItems[0].publishedAt) : undefined,
+          lastItemGuid: limitedItems.length > 0 ? (limitedItems[0].fingerprint || limitedItems[0].url) : undefined,
+          totalFetched: { increment: limitedItems.length },
+          errorCount: 0,
+          lastError: null,
+        },
+      });
+    } catch (error) {
+      const errorMsg = `${feed.name}: ${error}`;
+      console.error(`[Scraper] Error: ${errorMsg}`);
+      stats.errors.push(errorMsg);
+
+      await prisma.rssFeed.update({
+        where: { id: feed.id },
+        data: {
+          errorCount: { increment: 1 },
+          lastError: String(error),
+          status: feed.errorCount >= 3 ? FeedStatus.error : undefined,
+        },
+      });
+    }
+  }
+
+  console.log(`[Scraper] Category ${preferredCategory} (${priority}): ${stats.feedsChecked} feeds, ${stats.itemsNew} new items`);
+  
+  return { items, stats };
+}
+
+/**
  * Mark items as processed
  */
 export async function markItemsProcessed(guids: string[], articleIds: string[]) {

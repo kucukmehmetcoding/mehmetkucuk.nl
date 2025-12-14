@@ -1,7 +1,7 @@
 import cron from 'node-cron';
 import { prisma } from '@/lib/prisma';
 import { FeedPriority } from '@prisma/client';
-import { scrapeByPriority, clearOldCache, ScrapedItem } from './dbScraper';
+import { scrapeByPriority, scrapeByPriorityAndCategory, clearOldCache, ScrapedItem } from './dbScraper';
 import { writeDraftsFromScraped } from './dbAiWriter';
 import { publishDraftsWithCategory } from './dbPublisher';
 
@@ -14,6 +14,16 @@ interface BotSettings {
   maxArticlesPerHour: number;
   minQaScore: number;
   autoPublish: boolean;
+}
+
+// Round-robin category distribution for balanced feed scraping
+const ALL_CATEGORIES = ['technology', 'ai', 'crypto', 'programming', 'security', 'science', 'gaming', 'gadgets', 'business', 'space', 'software', 'web', 'mobile', 'devops', 'database', 'cloud', 'startup', 'other'];
+let currentCategoryIndex = 0;
+
+function getNextCategory(): string {
+  const category = ALL_CATEGORIES[currentCategoryIndex % ALL_CATEGORIES.length];
+  currentCategoryIndex++;
+  return category;
 }
 
 let settings: BotSettings | null = null;
@@ -94,11 +104,12 @@ async function runCycle(priority: FeedPriority): Promise<void> {
   });
   
   try {
-    // Step 1: Scrape feeds
-    const { items, stats: scrapeStats } = await scrapeByPriority(priority);
+    // Step 1: Scrape feeds with round-robin category distribution
+    const preferredCategory = getNextCategory();
+    const { items, stats: scrapeStats } = await scrapeByPriorityAndCategory(priority, preferredCategory);
     
     if (items.length === 0) {
-      console.log(`[Scheduler] No new items found in ${priority} priority feeds`);
+      console.log(`[Scheduler] No new items found in ${priority} priority feeds (category: ${preferredCategory})`);
       await prisma.botRunLog.update({
         where: { id: runLog.id },
         data: {
