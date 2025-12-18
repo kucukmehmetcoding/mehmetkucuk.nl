@@ -23,6 +23,6 @@ ${urls}
 </urlset>`;
 
   return new NextResponse(xml, {
-    headers: {'content-type': 'application/xml'}
+    headers: {'content-type': 'application/xml; charset=utf-8'}
   });
 }

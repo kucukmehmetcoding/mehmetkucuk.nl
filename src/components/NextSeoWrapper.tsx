@@ -11,12 +11,18 @@ type Props = {
 };
 
 export function NextSeoWrapper({article, translation}: Props) {
-  const url = `${siteUrl}/${translation.lang}/news/${article.slug}`;
+  // Use canonical `/post/:slug` (per-language) instead of legacy `/news`
+  const url = `${siteUrl}/${translation.lang}/post/${translation.slug}`;
   const alternateRefs = SUPPORTED_LANGS.map((lang) => ({
     hrefLang: lang,
-    href: `${siteUrl}/${lang}/news/${article.slug}`
+    href: `${siteUrl}/${lang}/post/${translation.slug}`
   }));
 
+  const imageUrl = article.imageUrl
+    ? article.imageUrl.startsWith('http')
+      ? article.imageUrl
+      : `${siteUrl}${article.imageUrl.startsWith('/') ? '' : '/'}${article.imageUrl}`
+    : undefined;
   return (
     <NextSeo
       title={translation.seoTitle}
@@ -33,7 +39,7 @@ export function NextSeoWrapper({article, translation}: Props) {
         images: article.imageUrl
           ? [
               {
-                url: article.imageUrl,
+                url: imageUrl as string,
                 alt: translation.title
               }
             ]

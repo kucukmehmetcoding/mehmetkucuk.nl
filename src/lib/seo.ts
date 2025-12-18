@@ -65,7 +65,8 @@ export function buildArticleMetadata(
     authors: [{ name: translation.author }],
     creator: translation.author,
     publisher: SITE_NAME,
-    robots: translation.publishedAt ? 'index, follow' : 'noindex, nofollow',
+    // Prefer article-level published flag when available; fall back to translation.publishedAt
+    robots: (translation as any)?.article?.published || translation.publishedAt ? 'index, follow' : 'noindex, nofollow',
     alternates: {
       canonical: translation.canonicalUrl || url,
       languages: {
@@ -109,13 +110,15 @@ export function buildArticleMetadata(
 export function generateNewsArticleSchema(slug: string, translation: Translation, category?: string, imageUrl?: string) {
   const url = translation.canonicalUrl || `${siteUrl}/${translation.lang}/post/${slug}`;
 
+  const resolvedImage = imageUrl ? toAbsoluteUrl(imageUrl) : `${siteUrl}/api/og-image`;
+
   return {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
     inLanguage: translation.lang,
     headline: translation.seoTitle || translation.title,
     description: translation.metaDescription || translation.summary,
-    image: imageUrl ? [imageUrl] : [],
+    image: resolvedImage ? [resolvedImage] : [],
     datePublished: translation.publishedAt?.toISOString(),
     dateModified: translation.updatedAt?.toISOString(),
     author: {
@@ -127,7 +130,6 @@ export function generateNewsArticleSchema(slug: string, translation: Translation
       name: SITE_NAME,
       logo: {
         '@type': 'ImageObject',
-        // Guaranteed to exist (generated icon route) and avoids relying on a static public file.
         url: `${siteUrl}/icon`,
         width: 250,
         height: 250,

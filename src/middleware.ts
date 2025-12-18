@@ -140,6 +140,15 @@ export function middleware(request: NextRequest) {
   }
 
   // Rate limiting for news pages (more aggressive)
+  // Redirect legacy /:lang/news/:slug -> /:lang/post/:slug to enforce canonical
+  const newsMatch = pathname.match(/^\/([a-z]{2})\/news\/(.+)$/);
+  if (newsMatch) {
+    const lang = newsMatch[1];
+    const rest = newsMatch[2];
+    const target = new URL(`/${lang}/post/${rest}`, request.url);
+    return NextResponse.redirect(target, 301);
+  }
+
   if (pathname.includes('/news/')) {
     const newsRateLimit = 200; // Higher limit for content pages
     const record = requestCounts.get(ip);
