@@ -28,7 +28,9 @@ export async function generateMetadata({params}: {params: {lang: string; slug: s
   if (!article || !translation) {
     return {};
   }
-  return buildArticleMetadata(translation.slug, translation, article.imageUrl || undefined);
+  // Pass the parent article on the translation so metadata can use article.published
+  const translationWithArticle = {...translation, article};
+  return buildArticleMetadata(translation.slug, translationWithArticle as any, article.imageUrl || undefined);
 }
 
 export default async function ArticlePage({params}: {params: {lang: string; slug: string}}) {
